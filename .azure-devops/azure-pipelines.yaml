@@ -1,0 +1,33 @@
+resources:
+  repositories:
+    - repository: util-pipelines
+      type: git
+      name: Mayo Open Developer Network/ado-utility-pipelines
+      ref: refs/heads/main
+
+trigger:
+  - develop
+  - stage
+  - main
+
+name: $(BuildDefinitionName)_v$(Build.SourceBranchName)_b$(Date:yyyyMMddmmss)$(Rev:.r)
+
+parameters:
+  - name: APP_NAME
+    type: string
+    default: 'sched-rag-svc'
+extends:
+  template: ado_cloud_build_trigger.yaml@util-pipelines
+  parameters:
+# Uncomment if you are using variable groups
+    PROD_USR_VARG:
+      - cloud_build-config
+    DEV_USR_VARG:
+      - cloud_build-config
+    CLOUD_BUILD_SUBSTITUTIONS:
+      - ADO_BASE64_PAT_TOKEN
+      - GCP_ARTIFACT_REPO
+      - SOURCE_BRANCH_NAME
+    USER_PIPELINE_VALUES:
+      APP_NAME: ${{ parameters.APP_NAME }}
+      SOURCE_BRANCH_NAME: $(Build.SourceBranchName)
