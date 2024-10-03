@@ -15,7 +15,7 @@ name: $(BuildDefinitionName)_v$(Build.SourceBranchName)_b$(Date:yyyyMMddmmss)$(R
 parameters:
   - name: APP_NAME
     type: string
-    default: 'sched-rag-svc'
+    default: 'sched-api'
 extends:
   template: ado_cloud_build_trigger.yaml@util-pipelines
   parameters:
