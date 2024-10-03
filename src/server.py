@@ -13,19 +13,18 @@ app = FastAPI()
 
 @app.get("/")
 def hello():
-    return {"message": "Welcome to AZ Scheduling RAG Service"}
+    return {"message": "Welcome to AZ Scheduling API"}
 
 @app.get("/status")
 def health_check():
     return {"message": "Health check ok"}
 
-@app.post("/patient-like-me")
-async def find_patient_like_me(req: Request):
-
-    pat = await req.json()
-    print (pat)
-
-    response = find_patients(VERTEX_PROJECT_ID, VERTEX_INDEX_ID, VERTEX_LOCATION, VERTEX_ENDPOINT_ID, pat)
+@app.get("/schedule/{clinic_num}")
+async def find_patient_like_me(clinic_num: str):
+    # retrieve patient data from Clarity using clinic_num
+    
+    # call analysis svc
+    response = {"clinic_num": clinic_num, "appts_to_schedule": ["consult"]}
 
     print(response)
     return response
