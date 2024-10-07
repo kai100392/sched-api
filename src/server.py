@@ -9,7 +9,7 @@ VERTEX_PROJECT_ID = os.getenv("VERTEX_PROJECT_ID", "aif-usr-p-az-schedul-efe3")
 VERTEX_INDEX_ID = os.getenv("VERTEX_INDEX_ID", "all_embedding_clarity_patient_deployed_09232024_1")
 VERTEX_LOCATION = os.getenv("VERTEX_LOCATION", "us-central1")
 
-app = FastAPI()
+app = FastAPI(docs_url="/api/docs", openapi_url="/api/openapi.json")
 
 @app.get("/api")
 def hello():
