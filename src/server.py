@@ -11,15 +11,15 @@ VERTEX_LOCATION = os.getenv("VERTEX_LOCATION", "us-central1")
 
 app = FastAPI()
 
-@app.get("/")
+@app.get("/api")
 def hello():
     return {"message": "Welcome to AZ Scheduling API"}
 
-@app.get("/status")
+@app.get("/api/status")
 def health_check():
     return {"message": "Health check ok"}
 
-@app.get("/schedule/{clinic_num}")
+@app.get("/api/schedule/{clinic_num}")
 async def find_patient_like_me(clinic_num: str):
     # retrieve patient data from Clarity using clinic_num
     
