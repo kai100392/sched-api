@@ -2,12 +2,12 @@ from pydantic import BaseModel, Field
 
 
 class ScheduleResponse (BaseModel):
-    clinic_number: int
-    scheduling_actions: []
-    similar_patients: []
+    clinic_num: int
+    scheduling_actions: list [str]= []
+    similar_patients: list [str] = []
 
 class SimilarPatient (BaseModel):
-    clinic_number: int
+    clinic_num: int
     callin_date: str
     appt_date: str
     PSA: float
