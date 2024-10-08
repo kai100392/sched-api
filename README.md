@@ -13,7 +13,25 @@ python3 -m venv .venv
 source .venv/bin/activate
 python3 -m pip install -r src/requirements.txt
 
-# Build and Test
+# Build container and pushing to GCP
+From the top level directory run the following commands to test the service:
+
+```
+gcloud auth login
+gcloud auth application-default login
+gcloud auth login --update-adc
+gcloud auth configure-docker us-central1-docker.pkg.dev
+docker build --no-cache -t us-central1-docker.pkg.dev/cdh-az-sched-n-328641622107/artifact-repository/sched-api:<your-label> ./
+docker push us-central1-docker.pkg.dev/cdh-az-sched-n-328641622107/artifact-repository/sched-api:<your-label>
+```
+
+Adjust "your-label" to something that you can easily identify the image version in artificat registry.
+
+In Cloud Run in CAF Dev, use the [Edit & Deploy New Revision button] to test your new build
+
+After this deploys, the front end app in CAF Dev will be interacting with the new `sched-api`: dev.cdh-az-sched-n.caf.mccapp.com
+
+# Test
 gcloud auth application-default login
 fastapi dev src/server.py
 
