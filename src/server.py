@@ -1,5 +1,5 @@
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Body
 import os
 from patient_search import find_patients
 
@@ -24,7 +24,8 @@ async def schedule(clinic_num: str):
     # retrieve patient data from Clarity using clinic_num
     
     # call analysis svc
-    response = {"clinic_num": clinic_num, "appts_to_schedule": ["consult"], similar_patients: []}
-
+    response = Body (SchedulingResponse, ...)
+    # {"clinic_num": clinic_num, "appts_to_schedule": ["consult"], similar_patients: []}
+    
     print(response)
     return response
