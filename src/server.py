@@ -90,9 +90,9 @@ async def schedule(clinic_num: str) -> list:
 def call_analysis_service (req: PatientRequest, analysis_svc_url, client_id):
     input = jsonable_encoder(req)
     print(f"Getting open_id_connect_token for {client_id} to call url {analysis_svc_url}")
-    # open_id_connect_token = id_token.fetch_id_token(Request(), client_id)
+    open_id_connect_token = id_token.fetch_id_token(Request(), client_id)
 
-    # print(f"open_id_connect_token fetched ${open_id_connect_token}, submitting request to url {analysis_svc_url}")
+    print(f"open_id_connect_token fetched ${open_id_connect_token}, submitting request to url {analysis_svc_url}")
     print(input)
 
     try:
@@ -100,7 +100,7 @@ def call_analysis_service (req: PatientRequest, analysis_svc_url, client_id):
             "POST",
             analysis_svc_url,
             headers={
-                # "Authorization": f"Bearer {open_id_connect_token}",
+                "Authorization": f"Bearer {open_id_connect_token}",
                 "Content-Type": "application/json",
             },
             json=input
