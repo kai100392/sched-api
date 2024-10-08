@@ -1,13 +1,9 @@
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Body
+from models import SimilarPatient, SimilarPatientsResponse
 import os
-from patient_search import find_patients
 
-
-VERTEX_ENDPOINT_ID = os.getenv("VERTEX_ENDPOINT_ID", "6314658006038478848")
-VERTEX_PROJECT_ID = os.getenv("VERTEX_PROJECT_ID", "aif-usr-p-az-schedul-efe3")
-VERTEX_INDEX_ID = os.getenv("VERTEX_INDEX_ID", "all_embedding_clarity_patient_deployed_09232024_1")
-VERTEX_LOCATION = os.getenv("VERTEX_LOCATION", "us-central1")
+ANALYSIS_URL = os.getenv("ANALYSIS_URL", "http://localhost:8000/patient_like_me")
 
 app = FastAPI(docs_url="/api/docs", openapi_url="/api/openapi.json")
 
@@ -20,11 +16,17 @@ def health_check():
     return {"message": "Health check ok"}
 
 @app.get("/api/schedule/{clinic_num}")
-async def find_patient_like_me(clinic_num: str):
+async def schedule(clinic_num: str) -> SimilarPatientsResponse:
     # retrieve patient data from Clarity using clinic_num
     
     # call analysis svc
-    response = {"clinic_num": clinic_num, "appts_to_schedule": ["consult"]}
+    analysis_response = { "similar_patients": [3303923, 3303925] }
+
+    # retrieve patient data from Clarity for the patients returned above
+    similar_patients = [ SimilarPatient(clinic_num = 3303923, callin_date = "2020-01-01 10:00", appt_date = "2020-01-05 8:00", PSA = 5, imaging = True, biopsy = "YES", actions = ["consult"]),
+                         SimilarPatient(clinic_num = 3303925, callin_date = "2020-02-04 13:00", appt_date = "2020-02-15 9:00", PSA = 9, imaging = True, biopsy = "NO", actions = ["Biopsy", "consult"])
+                    ]
+    response = SimilarPatientsResponse (clinic_num = clinic_num, similar_patients = similar_patients)
 
     print(response)
     return response
