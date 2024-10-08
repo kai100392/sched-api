@@ -15,12 +15,15 @@ def health_check():
     return {"message": "Health check ok"}
 
 @app.get("/api/schedule/{clinic_num}")
-async def schedule(clinic_num: str):
+async def schedule(clinic_num: str) -> SimilarPatientResponse:
     # retrieve patient data from Clarity using clinic_num
     
     # call analysis svc
-    response = Body (SchedulingResponse, ...)
-    # {"clinic_num": clinic_num, "appts_to_schedule": ["consult"], similar_patients: []}
-    
+    analysis_response = { similar_patients: [3303923, 3303925] }
+    similar_patients = [ SimilarPatient(clinic_num: 3303923, callin_date: "2020-01-01 10:00", appt_date: "2020-01-05 8:00", PSA: 5)},
+                         SimilarPatient(clinic_num: 3303925, callin_date: "2020-02-04 13:00", appt_date: "2020-02-15 9:00", PSA: 9)}
+                    ]
+    response = SimilarPatientsReponse (clinic_num: clinic_num, similar_patients: similar_patients)
+
     print(response)
     return response
