@@ -1,13 +1,8 @@
 
 from fastapi import FastAPI, Request, Body
 import os
-from patient_search import find_patients
 
-
-VERTEX_ENDPOINT_ID = os.getenv("VERTEX_ENDPOINT_ID", "6314658006038478848")
-VERTEX_PROJECT_ID = os.getenv("VERTEX_PROJECT_ID", "aif-usr-p-az-schedul-efe3")
-VERTEX_INDEX_ID = os.getenv("VERTEX_INDEX_ID", "all_embedding_clarity_patient_deployed_09232024_1")
-VERTEX_LOCATION = os.getenv("VERTEX_LOCATION", "us-central1")
+ANALYSIS_URL = os.getenv("ANALYSIS_URL", "http://localhost:8000/patient_like_me")
 
 app = FastAPI(docs_url="/api/docs", openapi_url="/api/openapi.json")
 
