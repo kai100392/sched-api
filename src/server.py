@@ -20,11 +20,11 @@ def health_check():
     return {"message": "Health check ok"}
 
 @app.get("/api/schedule/{clinic_num}")
-async def find_patient_like_me(clinic_num: str):
+async def schedule(clinic_num: str):
     # retrieve patient data from Clarity using clinic_num
     
     # call analysis svc
-    response = {"clinic_num": clinic_num, "appts_to_schedule": ["consult"]}
+    response = {"clinic_num": clinic_num, "appts_to_schedule": ["consult"], similar_patients: []}
 
     print(response)
     return response
