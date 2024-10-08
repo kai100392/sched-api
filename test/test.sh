@@ -1,4 +1,6 @@
-
-#curl -X GET -H "Authorization: Bearer $(gcloud auth print-access-token)" "https://dev.cdh-az-sched-n.caf.mccapp.com/schedule/12345678" -d @test.json 
-
-curl -X GET -H "Authorization: Bearer $(gcloud auth print-access-token)" "http://localhost:8000/schedule/12345678"
+curl -X 'POST' \
+  'https://dev.cdh-az-sched-n.caf.mccapp.com/analysis/patient-like-me' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer $eyJhbGciOiJSUzI1NiIsImtpZCI6IjI4YTQyMWNhZmJlM2RkODg5MjcxZGY5MDBmNGJiZjE2ZGI1YzI0ZDQiLCJ0eXAiOiJKV1QifQ.eyJhdWQiOiI0OTM1OTA0ODU1ODYtdHNiNWlidDZrY3Ayb2ptOG52cHQ5cjU0cDlwcDc3YzkuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJhenAiOiIxMTM5ODg0MjQzMjAxMjQ1MDUxNjkiLCJlbWFpbCI6ImdzYS1zY2hlZC1hcGlAY2RoLWF6LXNjaGVkLW4tMzI4NjQxNjIyMTA3LmlhbS5nc2VydmljZWFjY291bnQuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImV4cCI6MTcyODQxNTgxOCwiaWF0IjoxNzI4NDEyMjE4LCJpc3MiOiJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iLCJzdWIiOiIxMTM5ODg0MjQzMjAxMjQ1MDUxNjkifQ.soWKuLwZphzyJnXjfJdEd29CnyUSmBWRvToRy1JK1yggSEUGTSUHXY6vYPkzifrrlElfZxFpAInfLMVsvqiiRwqGGBsgGFx0c4D_T9pb9zIUOTaOFdd8908qd_LBRtN4asN8nSGVRplBOlbYT9M5qFDKjWEBNnthN-N5Z7C9ivbx6HHzmKxveR9p_kE_zVTWVSo-kq2fOHRt3HGloG8PgCHsJ2zn3BAU0te1aFrfOoeQBcUrJtDql-0FPTm-FJ4iS0m_VynE6RFiBGcqGBX4eDsxfUhSvVzd_hjyr6dEvN0m-3DYMP71wQU98B6fm7mZn3ss3K1zX7LEoCWsIespqg' \
+  -d @test/test.json

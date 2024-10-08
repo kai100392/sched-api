@@ -15,9 +15,6 @@ class SimilarPatient (BaseModel):
     biopsy: str
     actions: list [str] = []
 
-class SimilarPatientsResponse (BaseModel):
-    similar_patients: list [SimilarPatient] = []
-
 
 class PatientRequest (BaseModel):
     PROSTATE_CANCER_VISIT_AGE_FIRST: float

@@ -1,14 +1,17 @@
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Body
 from fastapi.encoders import jsonable_encoder
 from google.oauth2 import id_token
 from google.auth.transport.requests import Request
-from models import SimilarPatient, SimilarPatientsResponse, PatientRequest
+from models import SimilarPatient, PatientRequest
 import os
 import requests
 import json
+from util import dict2obj
 
-ANALYSIS_URL = os.getenv("ANALYSIS_URL", "https://dev.cdh-az-sched-n.caf.mccapp.com/analysis/patient_like_me")
+print("AZ Sched API - 0.0.1")
+
+ANALYSIS_URL = os.getenv("ANALYSIS_URL", "https://dev.cdh-az-sched-n.caf.mccapp.com/analysis")
 IAP_CLIENT_ID = os.getenv(
     "IAP_CLIENT_ID",
     "493590485586-tsb5ibt6kcp2ojm8nvpt9r54p9pp77c9.apps.googleusercontent.com",
@@ -25,7 +28,7 @@ def health_check():
     return {"message": "Health check ok"}
 
 @app.get("/api/schedule/{clinic_num}")
-async def schedule(clinic_num: str) -> SimilarPatientsResponse:
+async def schedule(clinic_num: str) -> list:
     # retrieve patient data from Clarity using clinic_num
     req = { 
   "PROSTATE_CANCER_VISIT_AGE_FIRST": 75.0, 
@@ -65,53 +68,62 @@ async def schedule(clinic_num: str) -> SimilarPatientsResponse:
   "psa_4_unit": "",
   "psa_4_abnormal": "",
   "psa_recent_increase_percent": 0.0
-}
+  }
 
 
     # call analysis svc
-    analysis_response = call_analysis_service (req, ANALYSIS_URL, IAP_CLIENT_ID)
+    analysis_response = call_analysis_service (req, f"{ANALYSIS_URL}/patient-like-me", IAP_CLIENT_ID)
 
     # retrieve patient data from Clarity for the patients returned above
-    similar_patients = [ SimilarPatient(clinic_num = 3303923, callin_date = "2020-01-01 10:00", appt_date = "2020-01-05 8:00", PSA = 5, imaging = True, biopsy = "YES", actions = ["consult"]),
-                         SimilarPatient(clinic_num = 3303925, callin_date = "2020-02-04 13:00", appt_date = "2020-02-15 9:00", PSA = 9, imaging = True, biopsy = "NO", actions = ["Biopsy", "consult"])
-                    ]
-    similar_patients = analysis_response.similar_patients
+    # similar_patients = [ SimilarPatient(clinic_num = 3303923, callin_date = "2020-01-01 10:00", appt_date = "2020-01-05 8:00", PSA = 5, imaging = True, biopsy = "YES", actions = ["consult"]),
+    #                      SimilarPatient(clinic_num = 3303925, callin_date = "2020-02-04 13:00", appt_date = "2020-02-15 9:00", PSA = 9, imaging = True, biopsy = "NO", actions = ["Biopsy", "consult"])
+    #                 ]
 
-    response = SimilarPatientsResponse (clinic_num = clinic_num, similar_patients = similar_patients)
+    print("analysis_response")
+    print(json.dumps(analysis_response))
+
+    response = analysis_response["similar_patients"]
 
     print(response)
     return response
 
 def call_analysis_service (req: PatientRequest, analysis_svc_url, client_id):
     input = jsonable_encoder(req)
-    print("Getting open_id_connect_token")
-    open_id_connect_token = id_token.fetch_id_token(Request(), client_id)
+    print(f"Getting open_id_connect_token for {client_id} to call url {analysis_svc_url}")
+    # open_id_connect_token = id_token.fetch_id_token(Request(), client_id)
 
-    print("open_id_connect_token fetched, submitting request")
+    # print(f"open_id_connect_token fetched ${open_id_connect_token}, submitting request to url {analysis_svc_url}")
+    print(input)
 
-    resp = requests.request(
-        "POST",
-        analysis_svc_url,
-        headers={
-            "Authorization": f"Bearer {open_id_connect_token}",
-            "Content-Type": "application/json",
-        },
-        json=input
-    )
-    print("response received")
-    print(resp)
-
-    if resp.status_code == 403:
-        raise Exception(
-            "Service account does not have permission to "
-            "access the IAP-protected application."
+    try:
+        resp = requests.request(
+            "POST",
+            analysis_svc_url,
+            headers={
+                # "Authorization": f"Bearer {open_id_connect_token}",
+                "Content-Type": "application/json",
+            },
+            json=input
         )
-    elif resp.status_code != 200:
+        print("response received")
+        print(resp)
+
+        if resp.status_code == 403:
+            raise Exception(
+                "Service account does not have permission to "
+                "access the IAP-protected application."
+            )
+        elif resp.status_code != 200:
+            raise Exception(
+                f"Bad response from application: {resp.status_code!r} / {resp.headers!r} / {resp.text!r}"
+            )
+        else:
+            # format output
+            print(resp.text)
+            prediction_response = json.loads(resp.text)
+            return prediction_response
+    except Exception as e:
+        print(f"Error calling ${analysis_svc_url}: {e}")
         raise Exception(
-            f"Bad response from application: {resp.status_code!r} / {resp.headers!r} / {resp.text!r}"
-        )
-    else:
-        # format output
-        print(resp.text)
-        prediction_response = json.loads(resp.text)
-        return prediction_response
+                f"Error calling ${analysis_svc_url}: {e}"
+            )
