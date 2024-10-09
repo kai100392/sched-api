@@ -28,7 +28,7 @@ def health_check():
     return {"message": "Health check ok"}
 
 @app.get("/api/schedule/{clinic_num}")
-async def schedule(clinic_num: str) -> list:
+async def schedule(clinic_num: str) -> list [SimilarPatient]:
     # retrieve patient data from Clarity using clinic_num
     req = { 
   "PROSTATE_CANCER_VISIT_AGE_FIRST": 75.0, 
@@ -82,8 +82,17 @@ async def schedule(clinic_num: str) -> list:
     print("analysis_response")
     print(json.dumps(analysis_response))
 
-    response = analysis_response["similar_patients"]
-
+    response = []
+    for r in analysis_response["similar_patients"]:
+        response.append(SimilarPatient(
+        clinic_num = r ["clinic_num"],
+        callin_date = "callin date",
+        appt_date = "appt date",
+        PSA = 8.5,
+        imaging = False,
+        biopsy = "biopsy",
+        actions = ["biopsy", "consult"]
+        ))
     print(response)
     return response
 
