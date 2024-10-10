@@ -28,7 +28,7 @@ def health_check():
     return {"message": "Health check ok"}
 
 @app.get("/api/cap2/{clinic_num}")
-def get_patient(clinic_num: str):
+def get_patient(clinic_num: str) -> PatientRequest:
     pat = { 
         "PROSTATE_CANCER_VISIT_AGE_FIRST": 75.0, 
         "biopsy_1": "URO MR Fusion",
