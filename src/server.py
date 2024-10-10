@@ -27,7 +27,7 @@ def hello():
 def health_check():
     return {"message": "Health check ok"}
 
-@app.get("/api/cap2/{clinic_num}")
+@app.get("/api/cap2/patient-state/{clinic_num}")
 def get_patient(clinic_num: str) -> PatientRequest:
     pat = { 
         "PROSTATE_CANCER_VISIT_AGE_FIRST": 75.0, 
@@ -67,11 +67,11 @@ def get_patient(clinic_num: str) -> PatientRequest:
         "psa_4_unit": "",
         "psa_4_abnormal": "",
         "psa_recent_increase_percent": 0.0
-        }
+    }
     return pat
 
-@app.get("/api/schedule/{clinic_num}")
-async def schedule(clinic_num: str) -> list [SimilarPatient]:
+@app.get("/api/cap3/patient-like-me/{clinic_num}")
+def find_similar_patient(clinic_num: str) -> list [SimilarPatient]:
     # retrieve patient data from Clarity using clinic_num
     req = { 
   "PROSTATE_CANCER_VISIT_AGE_FIRST": 75.0, 
@@ -138,6 +138,8 @@ async def schedule(clinic_num: str) -> list [SimilarPatient]:
         ))
     print(response)
     return response
+
+ 
 
 def call_analysis_service (req: PatientRequest, analysis_svc_url, client_id):
     input = jsonable_encoder(req)
