@@ -27,8 +27,51 @@ def hello():
 def health_check():
     return {"message": "Health check ok"}
 
-@app.get("/api/schedule/{clinic_num}")
-async def schedule(clinic_num: str) -> list [SimilarPatient]:
+@app.get("/api/cap2/patient-state/{clinic_num}")
+def get_patient(clinic_num: str) -> PatientRequest:
+    pat = { 
+        "PROSTATE_CANCER_VISIT_AGE_FIRST": 75.0, 
+        "biopsy_1": "URO MR Fusion",
+        "biopsy_1_days": 58,
+        "biopsy_1_abnormal": "",
+        "biopsy_2": "",
+        "biopsy_2_days": 0,
+        "biopsy_2_abnormal": "",
+        "imaging_1": "PET CT SKULL TO THIGH PSMA",
+        "imaging_1_days": 36, 
+        "imaging_1_abnormal": "",
+        "imaging_2": "CT ABDOMEN PELVIS WITH IV CONTRAST",
+        "imaging_2_days": 41,
+        "imaging_2_abnormal": "",
+        "imaging_3": "MR PROSTATE WITHOUT AND WITH IV CONTRAST",
+        "imaging_3_days": 86.0,
+        "imaging_3_abnormal": "",
+        "psa_1": "PROSTATE-SPECIFIC AG (PSA) DIAGNOSTIC, S",
+        "psa_1_days": 105.0,
+        "psa_1_value": 43.7,
+        "psa_1_unit": "ng/mL",
+        "psa_1_abnormal": "Y",
+        "psa_2": "",
+        "psa_2_days": 0.0,
+        "psa_2_value": 0.0,
+        "psa_2_unit": "",
+        "psa_2_abnormal": "",
+        "psa_3": "",
+        "psa_3_days": 0.0,
+        "psa_3_value": 0.0,
+        "psa_3_unit": "",
+        "psa_3_abnormal": "",
+        "psa_4": "",
+        "psa_4_days": 0.0,
+        "psa_4_value": 0.0,
+        "psa_4_unit": "",
+        "psa_4_abnormal": "",
+        "psa_recent_increase_percent": 0.0
+    }
+    return pat
+
+@app.get("/api/cap3/patient-like-me/{clinic_num}")
+def find_similar_patient(clinic_num: str) -> list [SimilarPatient]:
     # retrieve patient data from Clarity using clinic_num
     req = { 
   "PROSTATE_CANCER_VISIT_AGE_FIRST": 75.0, 
@@ -95,6 +138,8 @@ async def schedule(clinic_num: str) -> list [SimilarPatient]:
         ))
     print(response)
     return response
+
+ 
 
 def call_analysis_service (req: PatientRequest, analysis_svc_url, client_id):
     input = jsonable_encoder(req)
