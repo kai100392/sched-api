@@ -195,7 +195,7 @@ def find_similar_patient_mock () -> list [PatientRequest]:
 def call_analysis_service (method: str, data, analysis_svc_url, client_id):
     input = jsonable_encoder(data)
     print(f"Getting open_id_connect_token for {client_id} to call url {analysis_svc_url}")
-    open_id_connect_token = "a" #id_token.fetch_id_token(Request(), client_id)
+    open_id_connect_token = id_token.fetch_id_token(Request(), client_id)
 
     print(f"submitting {method} request to url {analysis_svc_url}")
     print(input)
