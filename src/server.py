@@ -11,7 +11,7 @@ from google.cloud import bigquery
     
 print("AZ Sched API - 0.0.1")
 
-ANALYSIS_URL = os.getenv("ANALYSIS_URL", "https://dev.cdh-az-sched-n.caf.mccapp.com/analysis")
+ANALYSIS_URL = os.getenv("ANALYSIS_URL", "https://sched-analysis-svc-493590485586.us-central1.run.app/analysis")
 PROJECT_ID = os.getenv("PROJECT_ID", "cdh-az-sched-n-328641622107")
 IAP_CLIENT_ID = os.getenv(
     "IAP_CLIENT_ID",
@@ -50,7 +50,7 @@ def get_patient(clinic_num: str) -> PatientRequest:
     return pat
 
 @app.get("/api/cap2/patient-state2/{clinic_num}")
-def get_patient(clinic_num: str) -> PatientRequest:
+def get_patient2(clinic_num: str) -> PatientRequest:
     """Retrieve and assess patient state from analysis svc, use MRN# 3303923 or 3303925
 
     """
@@ -59,7 +59,7 @@ def get_patient(clinic_num: str) -> PatientRequest:
     return analysis_response
 
 @app.get("/api/cap3/patient-like-me/{clinic_num}")
-def find_similar_patient(clinic_num: str) -> list [SimilarPatient]:
+def find_similar_patient(clinic_num: str) -> list [PatientRequest]:
     """Find similar patients, use MRN# 3303923 or 3303925
 
     """
@@ -97,7 +97,7 @@ def call_analysis_service (method: str, data, analysis_svc_url, client_id):
     print(f"Getting open_id_connect_token for {client_id} to call url {analysis_svc_url}")
     open_id_connect_token = id_token.fetch_id_token(Request(), client_id)
 
-    print(f"open_id_connect_token fetched ${open_id_connect_token}, submitting {method} request to url {analysis_svc_url}")
+    print(f"submitting {method} request to url {analysis_svc_url}")
     print(input)
 
     try:
