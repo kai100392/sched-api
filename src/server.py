@@ -49,60 +49,60 @@ def get_patient(clinic_num: str) -> PatientRequest:
     print(pat)
     return pat
 
-@app.get("/api/cap2/patient-state2/{clinic_num}")
-def get_patient2(clinic_num: str) -> PatientRequest:
-    """Retrieve and assess patient state from analysis svc, use MRN# 3303923 or 3303925
+# @app.get("/api/cap2/patient-state2/{clinic_num}")
+# def get_patient2(clinic_num: str) -> PatientRequest:
+#     """Retrieve and assess patient state from analysis svc, use MRN# 3303923 or 3303925
 
-    """
-    analysis_response = call_analysis_service ("GET", "", f"{ANALYSIS_URL}/cap2/patient-state/{clinic_num}", IAP_CLIENT_ID)
-    print(analysis_response)
-    return analysis_response
+#     """
+#     analysis_response = call_analysis_service ("GET", "", f"{ANALYSIS_URL}/cap2/patient-state/{clinic_num}", IAP_CLIENT_ID)
+#     print(analysis_response)
+#     return analysis_response
 
 @app.get("/api/cap3/patient-like-me/{clinic_num}")
 def find_similar_patient(clinic_num: str) -> list [PatientRequest]:
     """Find similar patients, use MRN# 3303923 or 3303925
 
     """
-    # req = get_patient(clinic_num)
-    req = { 
-    "PROSTATE_CANCER_VISIT_AGE_FIRST": 75.0, 
-    "biopsy_1": "URO MR Fusion",
-    "biopsy_1_days": 58,
-    "biopsy_1_abnormal": "",
-    "biopsy_2": "",
-    "biopsy_2_days": 0,
-    "biopsy_2_abnormal": "",
-    "imaging_1": "PET CT SKULL TO THIGH PSMA",
-    "imaging_1_days": 36, 
-    "imaging_1_abnormal": "",
-    "imaging_2": "CT ABDOMEN PELVIS WITH IV CONTRAST",
-    "imaging_2_days": 41,
-    "imaging_2_abnormal": "",
-    "imaging_3": "MR PROSTATE WITHOUT AND WITH IV CONTRAST",
-    "imaging_3_days": 86.0,
-    "imaging_3_abnormal": "",
-    "psa_1": "PROSTATE-SPECIFIC AG (PSA) DIAGNOSTIC, S",
-    "psa_1_days": 105.0,
-    "psa_1_value": 43.7,
-    "psa_1_unit": "ng/mL",
-    "psa_1_abnormal": "Y",
-    "psa_2": "",
-    "psa_2_days": 0.0,
-    "psa_2_value": 0.0,
-    "psa_2_unit": "",
-    "psa_2_abnormal": "",
-    "psa_3": "",
-    "psa_3_days": 0.0,
-    "psa_3_value": 0.0,
-    "psa_3_unit": "",
-    "psa_3_abnormal": "",
-    "psa_4": "",
-    "psa_4_days": 0.0,
-    "psa_4_value": 0.0,
-    "psa_4_unit": "",
-    "psa_4_abnormal": "",
-    "psa_recent_increase_percent": 0.0
-    }
+    req = get_patient(clinic_num)
+    # req = { 
+    # "PROSTATE_CANCER_VISIT_AGE_FIRST": 75.0, 
+    # "biopsy_1": "URO MR Fusion",
+    # "biopsy_1_days": 58,
+    # "biopsy_1_abnormal": "",
+    # "biopsy_2": "",
+    # "biopsy_2_days": 0,
+    # "biopsy_2_abnormal": "",
+    # "imaging_1": "PET CT SKULL TO THIGH PSMA",
+    # "imaging_1_days": 36, 
+    # "imaging_1_abnormal": "",
+    # "imaging_2": "CT ABDOMEN PELVIS WITH IV CONTRAST",
+    # "imaging_2_days": 41,
+    # "imaging_2_abnormal": "",
+    # "imaging_3": "MR PROSTATE WITHOUT AND WITH IV CONTRAST",
+    # "imaging_3_days": 86.0,
+    # "imaging_3_abnormal": "",
+    # "psa_1": "PROSTATE-SPECIFIC AG (PSA) DIAGNOSTIC, S",
+    # "psa_1_days": 105.0,
+    # "psa_1_value": 43.7,
+    # "psa_1_unit": "ng/mL",
+    # "psa_1_abnormal": "Y",
+    # "psa_2": "",
+    # "psa_2_days": 0.0,
+    # "psa_2_value": 0.0,
+    # "psa_2_unit": "",
+    # "psa_2_abnormal": "",
+    # "psa_3": "",
+    # "psa_3_days": 0.0,
+    # "psa_3_value": 0.0,
+    # "psa_3_unit": "",
+    # "psa_3_abnormal": "",
+    # "psa_4": "",
+    # "psa_4_days": 0.0,
+    # "psa_4_value": 0.0,
+    # "psa_4_unit": "",
+    # "psa_4_abnormal": "",
+    # "psa_recent_increase_percent": 0.0
+    # }
 
 
     analysis_response = call_analysis_service ("POST", req, f"{ANALYSIS_URL}/cap3/patient-like-me", IAP_CLIENT_ID)
@@ -132,12 +132,70 @@ def find_similar_patient(clinic_num: str) -> list [PatientRequest]:
     print(response)
     return response
 
- 
+
+
+@app.get("/api/cap3/patient-like-me-mock")
+def find_similar_patient_mock () -> list [PatientRequest]:
+    """Find similar patients calling analysis mock endpoint (not calling vertex search)
+
+    """
+    req = { 
+        "PROSTATE_CANCER_VISIT_AGE_FIRST": 75.0, 
+        "biopsy_1": "URO MR Fusion",
+        "biopsy_1_days": 58,
+        "biopsy_1_abnormal": "",
+        "biopsy_2": "",
+        "biopsy_2_days": 0,
+        "biopsy_2_abnormal": "",
+        "imaging_1": "PET CT SKULL TO THIGH PSMA",
+        "imaging_1_days": 36, 
+        "imaging_1_abnormal": "",
+        "imaging_2": "CT ABDOMEN PELVIS WITH IV CONTRAST",
+        "imaging_2_days": 41,
+        "imaging_2_abnormal": "",
+        "imaging_3": "MR PROSTATE WITHOUT AND WITH IV CONTRAST",
+        "imaging_3_days": 86.0,
+        "imaging_3_abnormal": "",
+        "psa_1": "PROSTATE-SPECIFIC AG (PSA) DIAGNOSTIC, S",
+        "psa_1_days": 105.0,
+        "psa_1_value": 43.7,
+        "psa_1_unit": "ng/mL",
+        "psa_1_abnormal": "Y",
+        "psa_2": "",
+        "psa_2_days": 0.0,
+        "psa_2_value": 0.0,
+        "psa_2_unit": "",
+        "psa_2_abnormal": "",
+        "psa_3": "",
+        "psa_3_days": 0.0,
+        "psa_3_value": 0.0,
+        "psa_3_unit": "",
+        "psa_3_abnormal": "",
+        "psa_4": "",
+        "psa_4_days": 0.0,
+        "psa_4_value": 0.0,
+        "psa_4_unit": "",
+        "psa_4_abnormal": "",
+        "psa_recent_increase_percent": 0.0
+    }
+
+
+    analysis_response = call_analysis_service ("POST", req, f"{ANALYSIS_URL}/cap3/patient-like-me/mock", IAP_CLIENT_ID)
+    print("analysis_response")
+    print(json.dumps(analysis_response))
+
+    response = []
+    for r in analysis_response["similar_patients"]:
+        print(r)
+        p = get_patient(r["clinic_num"])
+        response.append(p)
+    print(response)
+    return response 
 
 def call_analysis_service (method: str, data, analysis_svc_url, client_id):
     input = jsonable_encoder(data)
     print(f"Getting open_id_connect_token for {client_id} to call url {analysis_svc_url}")
-    open_id_connect_token = id_token.fetch_id_token(Request(), client_id)
+    open_id_connect_token = "a" #id_token.fetch_id_token(Request(), client_id)
 
     print(f"submitting {method} request to url {analysis_svc_url}")
     print(input)
