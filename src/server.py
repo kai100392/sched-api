@@ -54,7 +54,7 @@ def get_patient(clinic_num: str) -> PatientRequest:
     """Retrieve and assess patient state from analysis svc, use MRN# 3303923 or 3303925
 
     """
-    analysis_response = call_analysis_service ("GET", "", f"{ANALYSIS_URL}/cap2/patient-state", IAP_CLIENT_ID)
+    analysis_response = call_analysis_service ("GET", "", f"{ANALYSIS_URL}/cap2/patient-state/{clinic_num}", IAP_CLIENT_ID)
     print(analysis_response)
     return analysis_response
 
