@@ -1,5 +1,5 @@
 
-from fastapi import FastAPI, Body
+from fastapi import FastAPI, HTTPException
 from fastapi.encoders import jsonable_encoder
 from google.oauth2 import id_token
 from google.auth.transport.requests import Request
@@ -7,11 +7,12 @@ from models import SimilarPatient, PatientRequest
 import os
 import requests
 import json
-from util import dict2obj
-
+from google.cloud import bigquery
+    
 print("AZ Sched API - 0.0.1")
 
 ANALYSIS_URL = os.getenv("ANALYSIS_URL", "https://dev.cdh-az-sched-n.caf.mccapp.com/analysis")
+PROJECT_ID = os.getenv("PROJECT_ID", "cdh-az-sched-n-328641622107")
 IAP_CLIENT_ID = os.getenv(
     "IAP_CLIENT_ID",
     "493590485586-tsb5ibt6kcp2ojm8nvpt9r54p9pp77c9.apps.googleusercontent.com",
@@ -29,93 +30,41 @@ def health_check():
 
 @app.get("/api/cap2/patient-state/{clinic_num}")
 def get_patient(clinic_num: str) -> PatientRequest:
-    pat = { 
-        "PROSTATE_CANCER_VISIT_AGE_FIRST": 75.0, 
-        "biopsy_1": "URO MR Fusion",
-        "biopsy_1_days": 58,
-        "biopsy_1_abnormal": "",
-        "biopsy_2": "",
-        "biopsy_2_days": 0,
-        "biopsy_2_abnormal": "",
-        "imaging_1": "PET CT SKULL TO THIGH PSMA",
-        "imaging_1_days": 36, 
-        "imaging_1_abnormal": "",
-        "imaging_2": "CT ABDOMEN PELVIS WITH IV CONTRAST",
-        "imaging_2_days": 41,
-        "imaging_2_abnormal": "",
-        "imaging_3": "MR PROSTATE WITHOUT AND WITH IV CONTRAST",
-        "imaging_3_days": 86.0,
-        "imaging_3_abnormal": "",
-        "psa_1": "PROSTATE-SPECIFIC AG (PSA) DIAGNOSTIC, S",
-        "psa_1_days": 105.0,
-        "psa_1_value": 43.7,
-        "psa_1_unit": "ng/mL",
-        "psa_1_abnormal": "Y",
-        "psa_2": "",
-        "psa_2_days": 0.0,
-        "psa_2_value": 0.0,
-        "psa_2_unit": "",
-        "psa_2_abnormal": "",
-        "psa_3": "",
-        "psa_3_days": 0.0,
-        "psa_3_value": 0.0,
-        "psa_3_unit": "",
-        "psa_3_abnormal": "",
-        "psa_4": "",
-        "psa_4_days": 0.0,
-        "psa_4_value": 0.0,
-        "psa_4_unit": "",
-        "psa_4_abnormal": "",
-        "psa_recent_increase_percent": 0.0
-    }
+    """Retrieve and assess patient state, use MRN# 3303923 or 3303925
+
+    """
+    print (f"retrieving patient data for {clinic_num}")
+    pat = None
+    bq_client = bigquery.Client(project=PROJECT_ID)
+    QUERY_TEMPLATE = f"""
+            SELECT * FROM `{PROJECT_ID}.phi_azsched_us.expanded_patient_cohort`
+            where PAT_MRN_ID = "{clinic_num}";
+            """
+    query = QUERY_TEMPLATE
+    query_job = bq_client.query(query)
+    for row in query_job:
+        pat = dict(row.items())
+    if pat == None:
+        raise HTTPException(status_code=404, detail="Patient not found")
+    print(pat)
     return pat
+
+@app.get("/api/cap2/patient-state2/{clinic_num}")
+def get_patient(clinic_num: str) -> PatientRequest:
+    """Retrieve and assess patient state from analysis svc, use MRN# 3303923 or 3303925
+
+    """
+    analysis_response = call_analysis_service ("GET", "", f"{ANALYSIS_URL}/patient-state", IAP_CLIENT_ID)
+    print(analysis_response)
+    return analysis_response
 
 @app.get("/api/cap3/patient-like-me/{clinic_num}")
 def find_similar_patient(clinic_num: str) -> list [SimilarPatient]:
-    # retrieve patient data from Clarity using clinic_num
-    req = { 
-  "PROSTATE_CANCER_VISIT_AGE_FIRST": 75.0, 
-  "biopsy_1": "URO MR Fusion",
-  "biopsy_1_days": 58,
-  "biopsy_1_abnormal": "",
-  "biopsy_2": "",
-  "biopsy_2_days": 0,
-  "biopsy_2_abnormal": "",
-  "imaging_1": "PET CT SKULL TO THIGH PSMA",
-  "imaging_1_days": 36, 
-  "imaging_1_abnormal": "",
-  "imaging_2": "CT ABDOMEN PELVIS WITH IV CONTRAST",
-  "imaging_2_days": 41,
-  "imaging_2_abnormal": "",
-  "imaging_3": "MR PROSTATE WITHOUT AND WITH IV CONTRAST",
-  "imaging_3_days": 86.0,
-  "imaging_3_abnormal": "",
-  "psa_1": "PROSTATE-SPECIFIC AG (PSA) DIAGNOSTIC, S",
-  "psa_1_days": 105.0,
-  "psa_1_value": 43.7,
-  "psa_1_unit": "ng/mL",
-  "psa_1_abnormal": "Y",
-  "psa_2": "",
-  "psa_2_days": 0.0,
-  "psa_2_value": 0.0,
-  "psa_2_unit": "",
-  "psa_2_abnormal": "",
-  "psa_3": "",
-  "psa_3_days": 0.0,
-  "psa_3_value": 0.0,
-  "psa_3_unit": "",
-  "psa_3_abnormal": "",
-  "psa_4": "",
-  "psa_4_days": 0.0,
-  "psa_4_value": 0.0,
-  "psa_4_unit": "",
-  "psa_4_abnormal": "",
-  "psa_recent_increase_percent": 0.0
-  }
+    """Find similar patients, use MRN# 3303923 or 3303925
 
-
-    # call analysis svc
-    analysis_response = call_analysis_service (req, f"{ANALYSIS_URL}/patient-like-me", IAP_CLIENT_ID)
+    """
+    req = get_patient(clinic_num)
+    analysis_response = call_analysis_service ("POST", req, f"{ANALYSIS_URL}/patient-like-me", IAP_CLIENT_ID)
 
     # retrieve patient data from Clarity for the patients returned above
     # similar_patients = [ SimilarPatient(clinic_num = 3303923, callin_date = "2020-01-01 10:00", appt_date = "2020-01-05 8:00", PSA = 5, imaging = True, biopsy = "YES", actions = ["consult"]),
@@ -127,22 +76,24 @@ def find_similar_patient(clinic_num: str) -> list [SimilarPatient]:
 
     response = []
     for r in analysis_response["similar_patients"]:
-        response.append(SimilarPatient(
-        clinic_num = r ["clinic_num"],
-        callin_date = "callin date",
-        appt_date = "appt date",
-        PSA = 8.5,
-        imaging = False,
-        biopsy = "biopsy",
-        actions = ["biopsy", "consult"]
-        ))
+        # p = SimilarPatient(
+        #     clinic_num = r ["clinic_num"],
+        #     callin_date = "callin date",
+        #     appt_date = "appt date",
+        #     PSA = 8.5,
+        #     imaging = False,
+        #     biopsy = "biopsy",
+        #     actions = ["biopsy", "consult"]
+        # )
+        p = get_patient(clinic_num)
+        response.append(p)
     print(response)
     return response
 
  
 
-def call_analysis_service (req: PatientRequest, analysis_svc_url, client_id):
-    input = jsonable_encoder(req)
+def call_analysis_service (method: str, data, analysis_svc_url, client_id):
+    input = jsonable_encoder(data)
     print(f"Getting open_id_connect_token for {client_id} to call url {analysis_svc_url}")
     open_id_connect_token = id_token.fetch_id_token(Request(), client_id)
 
@@ -151,7 +102,7 @@ def call_analysis_service (req: PatientRequest, analysis_svc_url, client_id):
 
     try:
         resp = requests.request(
-            "POST",
+            method,
             analysis_svc_url,
             headers={
                 "Authorization": f"Bearer {open_id_connect_token}",
