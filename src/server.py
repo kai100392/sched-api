@@ -11,7 +11,7 @@ from google.cloud import bigquery
     
 print("AZ Sched API - 0.0.1")
 
-ANALYSIS_URL = os.getenv("ANALYSIS_URL", "https://dev.cdh-az-sched-n.caf.mccapp.com/analysis")
+ANALYSIS_URL = os.getenv("ANALYSIS_URL", "https://sched-analysis-svc-493590485586.us-central1.run.app/analysis")
 PROJECT_ID = os.getenv("PROJECT_ID", "cdh-az-sched-n-328641622107")
 IAP_CLIENT_ID = os.getenv(
     "IAP_CLIENT_ID",
@@ -59,7 +59,7 @@ def get_patient2(clinic_num: str) -> PatientRequest:
     return analysis_response
 
 @app.get("/api/cap3/patient-like-me/{clinic_num}")
-def find_similar_patient(clinic_num: str) -> list [SimilarPatient]:
+def find_similar_patient(clinic_num: str) -> list [PatientRequest]:
     """Find similar patients, use MRN# 3303923 or 3303925
 
     """
