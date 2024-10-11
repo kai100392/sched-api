@@ -54,7 +54,7 @@ def get_patient(clinic_num: str) -> PatientRequest:
     """Retrieve and assess patient state from analysis svc, use MRN# 3303923 or 3303925
 
     """
-    analysis_response = call_analysis_service ("GET", "", f"{ANALYSIS_URL}/patient-state", IAP_CLIENT_ID)
+    analysis_response = call_analysis_service ("GET", "", f"{ANALYSIS_URL}/cap2/patient-state/{clinic_num}", IAP_CLIENT_ID)
     print(analysis_response)
     return analysis_response
 
@@ -64,7 +64,7 @@ def find_similar_patient(clinic_num: str) -> list [SimilarPatient]:
 
     """
     req = get_patient(clinic_num)
-    analysis_response = call_analysis_service ("POST", req, f"{ANALYSIS_URL}/patient-like-me", IAP_CLIENT_ID)
+    analysis_response = call_analysis_service ("POST", req, f"{ANALYSIS_URL}/cap3/patient-like-me", IAP_CLIENT_ID)
 
     # retrieve patient data from Clarity for the patients returned above
     # similar_patients = [ SimilarPatient(clinic_num = 3303923, callin_date = "2020-01-01 10:00", appt_date = "2020-01-05 8:00", PSA = 5, imaging = True, biopsy = "YES", actions = ["consult"]),
@@ -97,7 +97,7 @@ def call_analysis_service (method: str, data, analysis_svc_url, client_id):
     print(f"Getting open_id_connect_token for {client_id} to call url {analysis_svc_url}")
     open_id_connect_token = id_token.fetch_id_token(Request(), client_id)
 
-    print(f"open_id_connect_token fetched ${open_id_connect_token}, submitting request to url {analysis_svc_url}")
+    print(f"open_id_connect_token fetched ${open_id_connect_token}, submitting {method} request to url {analysis_svc_url}")
     print(input)
 
     try:
