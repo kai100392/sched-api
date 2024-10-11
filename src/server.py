@@ -97,7 +97,7 @@ def call_analysis_service (method: str, data, analysis_svc_url, client_id):
     print(f"Getting open_id_connect_token for {client_id} to call url {analysis_svc_url}")
     open_id_connect_token = id_token.fetch_id_token(Request(), client_id)
 
-    print(f"open_id_connect_token fetched ${open_id_connect_token}, submitting {method} request to url {analysis_svc_url}")
+    print(f"submitting {method} request to url {analysis_svc_url}")
     print(input)
 
     try:
