@@ -50,7 +50,7 @@ def get_patient(clinic_num: str) -> PatientRequest:
     return pat
 
 @app.get("/api/cap2/patient-state2/{clinic_num}")
-def get_patient(clinic_num: str) -> PatientRequest:
+def get_patient2(clinic_num: str) -> PatientRequest:
     """Retrieve and assess patient state from analysis svc, use MRN# 3303923 or 3303925
 
     """
