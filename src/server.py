@@ -29,11 +29,11 @@ def health_check():
     return {"message": "Health check ok"}
 
 @app.get("/api/cap2/patient-state/{clinic_num}")
-def get_patient(clinic_num: str) -> PatientRequest:
+def get_patient(clinic_num: str, callin_date: str | None = None) -> PatientRequest:
     """Retrieve and assess patient state, use MRN# 3303923 or 3303925
 
     """
-    print (f"retrieving patient data for {clinic_num}")
+    print (f"retrieving patient data for {clinic_num}, callin_date={callin_date}")
     pat = None
     bq_client = bigquery.Client(project=PROJECT_ID)
     QUERY_TEMPLATE = f"""
@@ -59,10 +59,16 @@ def get_patient(clinic_num: str) -> PatientRequest:
 #     return analysis_response
 
 @app.get("/api/cap3/patient-like-me/{clinic_num}")
-def find_similar_patient(clinic_num: str) -> list [PatientRequest]:
-    """Find similar patients, use MRN# 3303923 or 3303925
+def find_similar_patient(clinic_num: str, mock: str | None = None) -> list [PatientRequest]:
+    """Find similar patients, use MRN# 3303923 or 3303925.  Pass optional parameter mock=Y for mock response
 
     """
+
+    print("find_similar_patient ({clinic_num}, {mock})")
+
+    if mock:
+        return find_similar_patient_mock()
+    
     req = get_patient(clinic_num)
     # req = { 
     # "PROSTATE_CANCER_VISIT_AGE_FIRST": 75.0, 
@@ -133,8 +139,6 @@ def find_similar_patient(clinic_num: str) -> list [PatientRequest]:
     return response
 
 
-
-@app.get("/api/cap3/patient-like-me-mock")
 def find_similar_patient_mock () -> list [PatientRequest]:
     """Find similar patients calling analysis mock endpoint (not calling vertex search)
 
@@ -179,7 +183,7 @@ def find_similar_patient_mock () -> list [PatientRequest]:
         "psa_recent_increase_percent": 0.0
     }
 
-
+    print("find_similar_patient_mock")
     analysis_response = call_analysis_service ("POST", req, f"{ANALYSIS_URL}/cap3/patient-like-me/mock", IAP_CLIENT_ID)
     print("analysis_response")
     print(json.dumps(analysis_response))
