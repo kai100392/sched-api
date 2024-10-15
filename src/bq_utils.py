@@ -68,36 +68,43 @@ def process_patient_group(group, call_in_date):
 
         return pd.Series(patient_data)
     
-# def get_bq_client():
-#     # project to access API through
-#     # get default credentials.  shouldn't be required, but is?
-#     credentials = google.auth.default()
-#     # Construct a BigQuery client object.
-#     client = bigquery.Client(credentials=credentials)
-#     return client
     
+def get_env_project_dataset(env) :
+    dev_list = ['development','d','dev']
+    prod_list = ['production','p','prod']
+    if env.lower() in dev_list:
+        return "ml-mps-adl-intudpcl-phi-d-f9bc", "d"
+    elif env.lower() in prod_list:
+        return "ml-mps-adl-intudpcl-phi-p-deec", "p"
+    else:
+        return "",""
+
 ###############################################
 #get_expanded_patient Function
 #   params:
 #       mcn: (string) Needs to be XX-XXX-XXX format (hyphens need to be present)
 #       call_in_date: Python datetime obj
+#       env: d (for development clarity) or p (for production clarity)
 #   returns:
 #       pandas dataframe
 ###############################################
-def get_expanded_patient(mcn, call_in_date):
-    
+def get_expanded_patient(mcn, call_in_date, env):
     client = bigquery.Client()
-
+    proj,dataset = get_env_project_dataset(env)
+    if not proj or not dataset:
+        raise ValueError(f"project or dataset is not set.  Check the env parameter to ensure it is correct.  Should be d or p.  Your value was {env}")
+        
+    
     query = f"""
     SELECT PAT.PAT_ID, PAT.PAT_MRN_ID, O.ORDER_TIME, O.DISPLAY_NAME, O.DESCRIPTION,
     O.RESULT_TIME, O2.ORD_NUM_VALUE, O2.REFERENCE_UNIT, O2.RESULT_STATUS_C, O2.RESULT_FLAG_C, O.ABNORMAL_YN,
     DATE_DIFF(O.RESULT_TIME, O.ORDER_TIME, day) as Result_datediff,
     EAP.PROC_CODE, EAP.PROC_ID, EAP.PROC_NAME, EAP.PROC_CAT_ID
-    FROM -- `ml-mps-adl-intudpcl-phi-p-deec.phi_gdpr_patient_us_p.PATIENT` pat
-    `ml-mps-adl-intudpcl-phi-p-deec.phi_patient_us_p.PATIENT` pat
-    inner join `ml-mps-adl-intudpcl-phi-p-deec.phi_clarity_us_p.ORDER_PROC` O on pat.PAT_ID = O.PAT_ID
-    LEFT JOIN `ml-mps-adl-intudpcl-phi-p-deec.phi_clarity_us_p.ORDER_RESULTS` O2 ON O2.ORDER_PROC_ID = O.ORDER_PROC_ID AND O2.LINE = 1
-    LEFT JOIN `ml-mps-adl-intudpcl-phi-p-deec.phi_clarity_us_p.CLARITY_EAP` EAP ON EAP.PROC_ID = O.PROC_ID
+    FROM 
+    `{proj}.phi_patient_us_{dataset}.PATIENT` pat
+    inner join `{proj}.phi_clarity_us_{dataset}.ORDER_PROC` O on pat.PAT_ID = O.PAT_ID
+    LEFT JOIN `{proj}.phi_clarity_us_{dataset}.ORDER_RESULTS` O2 ON O2.ORDER_PROC_ID = O.ORDER_PROC_ID AND O2.LINE = 1
+    LEFT JOIN `{proj}.phi_clarity_us_{dataset}.CLARITY_EAP` EAP ON EAP.PROC_ID = O.PROC_ID
     WHERE
     O.ORDER_TIME <= '{call_in_date.strftime('%Y-%m-%d')}'
     AND O.ORDER_STATUS_C <> 4 --5 - Completed
