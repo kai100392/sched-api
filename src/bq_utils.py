@@ -113,6 +113,7 @@ def get_expanded_patient(mcn, call_in_date, env):
     """
 
     # Run the query and get the results
+    print(query)
     query_job = client.query(query)
     results = query_job.result()
     #
