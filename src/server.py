@@ -8,7 +8,10 @@ import os
 import requests
 import json
 from google.cloud import bigquery
-    
+from bq_utils import get_expanded_patient
+from datetime import datetime
+
+   
 print("AZ Sched API - 0.0.1")
 
 ANALYSIS_URL = os.getenv("ANALYSIS_URL", "https://sched-analysis-svc-493590485586.us-central1.run.app/analysis")
@@ -17,6 +20,7 @@ IAP_CLIENT_ID = os.getenv(
     "IAP_CLIENT_ID",
     "493590485586-tsb5ibt6kcp2ojm8nvpt9r54p9pp77c9.apps.googleusercontent.com",
 )
+ENV = os.getenv("ENV", "d")
 
 app = FastAPI(docs_url="/api/docs", openapi_url="/api/openapi.json")
 
@@ -29,21 +33,30 @@ def health_check():
     return {"message": "Health check ok"}
 
 @app.get("/api/cap2/patient-state/{clinic_num}")
-def get_patient(clinic_num: str, callin_date: str | None = None) -> PatientRequest:
+def get_patient(clinic_num: str, callin_date: datetime | None = None, mock: str | None = None) -> PatientRequest:
     """Retrieve and assess patient state, use MRN# 3303923 or 3303925
 
     """
-    print (f"retrieving patient data for {clinic_num}, callin_date={callin_date}")
+
+    print (f"retrieving patient data for {clinic_num}, callin_date={callin_date}, mock={mock}")
+    if not callin_date:
+        callin_date = datetime.now()
+
     pat = None
-    bq_client = bigquery.Client(project=PROJECT_ID)
-    QUERY_TEMPLATE = f"""
-            SELECT * FROM `{PROJECT_ID}.phi_azsched_us.expanded_patient_cohort`
-            where PAT_MRN_ID = "{clinic_num}";
-            """
-    query = QUERY_TEMPLATE
-    query_job = bq_client.query(query)
-    for row in query_job:
-        pat = dict(row.items())
+    if mock:
+        bq_client = bigquery.Client(project=PROJECT_ID)
+        QUERY_TEMPLATE = f"""
+                SELECT * FROM `{PROJECT_ID}.phi_azsched_us.expanded_patient_cohort`
+                where PAT_MRN_ID = "{clinic_num}";
+                """
+        query = QUERY_TEMPLATE
+        query_job = bq_client.query(query)
+        for row in query_job:
+            pat = dict(row.items())
+    else:
+        patlist = get_expanded_patient (clinic_num, callin_date, ENV)
+        if len(patlist) > 0:
+            pat = patlist[0]
     if pat == None:
         raise HTTPException(status_code=404, detail="Patient not found")
     print(pat)
@@ -110,7 +123,6 @@ def find_similar_patient(clinic_num: str, mock: str | None = None) -> list [Pati
     # "psa_recent_increase_percent": 0.0
     # }
 
-
     analysis_response = call_analysis_service ("POST", req, f"{ANALYSIS_URL}/cap3/patient-like-me", IAP_CLIENT_ID)
 
     # retrieve patient data from Clarity for the patients returned above
@@ -137,7 +149,6 @@ def find_similar_patient(clinic_num: str, mock: str | None = None) -> list [Pati
         response.append(p)
     print(response)
     return response
-
 
 def find_similar_patient_mock () -> list [PatientRequest]:
     """Find similar patients calling analysis mock endpoint (not calling vertex search)
