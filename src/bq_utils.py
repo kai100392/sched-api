@@ -70,7 +70,7 @@ def process_patient_group(group, call_in_date):
     
     
 def get_env_project_dataset(env) :
-    dev_list = ['development','d','dev']
+    dev_list = ['development','d','dev', 'n']
     prod_list = ['production','p','prod']
     if env.lower() in dev_list:
         return "ml-mps-adl-intudpcl-phi-d-f9bc", "d"
