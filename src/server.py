@@ -43,7 +43,7 @@ def get_patient(clinic_num: str, callin_date: datetime | None = None, mock: str 
         callin_date = datetime.now()
 
     pat = None
-    if mock:
+    if mock and mock == 'Y':
         bq_client = bigquery.Client(project=PROJECT_ID)
         QUERY_TEMPLATE = f"""
                 SELECT * FROM `{PROJECT_ID}.phi_azsched_us.expanded_patient_cohort`
