@@ -2,7 +2,8 @@ google-auth~=2.29.0
 google-cloud-logging~=3.10.0
 google-cloud-storage~=2.18.1
 google-cloud-aiplatform
-
+google-cloud-bigquery==3.0.0
+ 
 gunicorn~=22.0
 uvicorn[standard]
 aiohttp~=3.10.2
