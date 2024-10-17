@@ -10,8 +10,9 @@ import json
 from google.cloud import bigquery
 from bq_utils import get_expanded_patient
 from datetime import datetime
+from fastapi.middleware.cors import CORSMiddleware
 
-   
+
 print("AZ Sched API - 0.0.1")
 
 ANALYSIS_URL = os.getenv("ANALYSIS_URL", "https://sched-analysis-svc-493590485586.us-central1.run.app/analysis")
@@ -21,8 +22,17 @@ IAP_CLIENT_ID = os.getenv(
     "493590485586-tsb5ibt6kcp2ojm8nvpt9r54p9pp77c9.apps.googleusercontent.com",
 )
 ENV = os.getenv("ENV", "d")
+UI_URL_BASE = os.getenv("UI_URL_BASE", "https://dev.cdh-az-sched-n.caf.mccapp.com")
 
 app = FastAPI(docs_url="/api/docs", openapi_url="/api/openapi.json")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[UI_URL_BASE],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/api")
 def hello():
@@ -77,9 +87,9 @@ def find_similar_patient(clinic_num: str, mock: str | None = None) -> list [Pati
 
     """
 
-    print("find_similar_patient ({clinic_num}, {mock})")
+    print(f"find_similar_patient ({clinic_num}, mock={mock})")
 
-    if mock:
+    if mock and mock == 'Y':
         return find_similar_patient_mock()
     
     req = get_patient(clinic_num)
@@ -202,7 +212,7 @@ def find_similar_patient_mock () -> list [PatientRequest]:
     response = []
     for r in analysis_response["similar_patients"]:
         print(r)
-        p = get_patient(r["clinic_num"])
+        p = get_patient(r["clinic_num"], mock="Y")
         response.append(p)
     print(response)
     return response 

@@ -5,7 +5,7 @@ RUN apk update && \
 FROM alpine-base AS python-build
 WORKDIR /app
 COPY src/ .
-RUN apk add --no-cache g++ make libffi-dev openssl-dev libc-dev python3-dev py3-virtualenv geos-dev && \
+RUN apk add --no-cache g++ make cmake libffi-dev openssl-dev libc-dev python3-dev py3-virtualenv geos-dev && \
     python3 -m venv venv && \
     . venv/bin/activate && \
     python3 -m ensurepip && \
