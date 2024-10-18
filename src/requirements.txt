@@ -1,17 +1,15 @@
-google-auth~=2.29.0
-google-cloud-logging~=3.10.0
-google-cloud-storage~=2.18.1
+google-auth
+google-cloud-logging
+google-cloud-storage
 google-cloud-aiplatform
-
-gunicorn~=22.0
+ 
+gunicorn
 uvicorn[standard]
-aiohttp~=3.10.2
-requests~=2.32.3
-jsonlines~=4.0.0
-ruff==0.5.0
-setuptools>=70.0.0
-fastapi==0.115.2
-pandas==2.2.3
-# db-dtypes==1.2.0
-# pyarrow==17.0.0
-# shapely==2.0.1
+aiohttp
+requests
+jsonlines
+ruff
+setuptools
+fastapi
+pandas
+db-dtypes
