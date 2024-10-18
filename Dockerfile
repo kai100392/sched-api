@@ -20,6 +20,8 @@ RUN apk update && \
 
 RUN apk add --no-cache python3 libffi openssl libc6-compat py3-virtualenv geos
 COPY --from=python-build /app .
+
+RUN python --version
 COPY src/ .
 COPY scripts/gunicorn-start.sh .
 RUN chmod 777 gunicorn-start.sh

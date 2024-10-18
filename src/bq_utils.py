@@ -115,7 +115,15 @@ def get_expanded_patient(mcn, call_in_date, env):
     # Run the query and get the results
     print(query)
     query_job = client.query(query)
+    
+    for row in query_job:
+        pat = dict(row.items())
+        print (pat)
+
     results = query_job.result()
+    # if len(results) == 0:
+    #     return []
+
     #
     df = results.to_dataframe()
     
