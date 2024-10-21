@@ -65,6 +65,7 @@ def get_patient(clinic_num: str, callin_date: datetime | None = None, mock: str 
             pat = dict(row.items())
     else:
         patlist = get_expanded_patient (clinic_num, callin_date, ENV)
+        print(patlist)
         if len(patlist) > 0:
             pat = patlist[0]
     if pat == None:
