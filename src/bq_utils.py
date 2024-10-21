@@ -1,5 +1,6 @@
 from google.cloud import bigquery
 import pandas as pd
+import numpy as np
 
 def process_patient_group(group, call_in_date):
     # from GenAI
@@ -116,16 +117,9 @@ def get_expanded_patient(mcn, call_in_date, env):
     print(query)
     query_job = client.query(query)
     
-    for row in query_job:
-        pat = dict(row.items())
-        print (pat)
-
     results = query_job.result()
-    # if len(results) == 0:
-    #     return []
-
-    #
     df = results.to_dataframe()
+    df = df.replace({np.nan: None})
     
     #Apply the processing function to each patient group
     final_df = df.groupby('PAT_MRN_ID').apply(process_patient_group, call_in_date=call_in_date)
