@@ -134,5 +134,5 @@ def get_expanded_patient(mcn, call_in_date, env):
     else:
         final_df = final_df.unstack().drop(columns='PAT_MRN_ID').reset_index()
 
-    patlist = final_df.T.to_dict("records")
+    patlist = final_df.to_dict(orient='records')
     return patlist
