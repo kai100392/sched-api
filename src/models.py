@@ -17,40 +17,40 @@ class SimilarPatient (BaseModel):
 
 
 class PatientRequest (BaseModel):
-    PROSTATE_CANCER_VISIT_AGE_FIRST: float
-    biopsy_1: str
-    biopsy_1_days: int
-    biopsy_1_abnormal: str
-    biopsy_2: str
-    biopsy_2_days: int
-    biopsy_2_abnormal: str
-    imaging_1: str
-    imaging_1_days: int
-    imaging_1_abnormal: str
-    imaging_2: str
-    imaging_2_days: int
-    imaging_2_abnormal: str
-    imaging_3: str
-    imaging_3_days: int
-    imaging_3_abnormal: str
-    psa_1: str
-    psa_1_days: int
-    psa_1_value: float
-    psa_1_unit: str
-    psa_1_abnormal: str
-    psa_2: str
-    psa_2_days: int
-    psa_2_value: float
-    psa_2_unit: str
-    psa_2_abnormal: str
-    psa_3: str
-    psa_3_days: int
-    psa_3_value: float
-    psa_3_unit: str
-    psa_3_abnormal: str
-    psa_4: str
-    psa_4_days: int
-    psa_4_value: float
-    psa_4_unit: str
-    psa_4_abnormal: str
-    psa_recent_increase_percent: float   
+    PROSTATE_CANCER_VISIT_AGE_FIRST: Optional[float] = None
+    biopsy_1: Optional[str] = None
+    biopsy_1_days: Optional[int] = None
+    biopsy_1_abnormal: Optional[str] = None
+    biopsy_2: Optional[str] = None
+    biopsy_2_days: Optional[int] = None
+    biopsy_2_abnormal: Optional[str] = None
+    imaging_1: Optional[str] = None
+    imaging_1_days: Optional[int] = None
+    imaging_1_abnormal: Optional[str] = None
+    imaging_2: Optional[str] = None
+    imaging_2_days: Optional[int] = None
+    imaging_2_abnormal: Optional[str] = None
+    imaging_3: Optional[str] = None
+    imaging_3_days: Optional[int] = None
+    imaging_3_abnormal: Optional[str] = None
+    psa_1: Optional[str] = None
+    psa_1_days: Optional[int] = None
+    psa_1_value: Optional[float] = None
+    psa_1_unit: Optional[str] = None
+    psa_1_abnormal: Optional[str] = None
+    psa_2: Optional[str] = None
+    psa_2_days: Optional[int] = None
+    psa_2_value: Optional[float] = None
+    psa_2_unit: Optional[str] = None
+    psa_2_abnormal: Optional[str] = None
+    psa_3: Optional[str] = None
+    psa_3_days: Optional[int] = None
+    psa_3_value: Optional[float] = None
+    psa_3_unit: Optional[str] = None
+    psa_3_abnormal: Optional[str] = None
+    psa_4: Optional[str] = None
+    psa_4_days: Optional[int] = None
+    psa_4_value: Optional[float] = None
+    psa_4_unit: Optional[str] = None
+    psa_4_abnormal: Optional[str] = None
+    psa_recent_increase_percent: Optional[float] = None   
