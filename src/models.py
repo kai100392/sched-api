@@ -54,3 +54,8 @@ class PatientRequest (BaseModel):
     psa_4_unit: Optional[str] = None
     psa_4_abnormal: Optional[str] = None
     psa_recent_increase_percent: Optional[float] = None   
+
+class UserInfo (BaseModel):
+    userEmail: str
+    userId: str
+    

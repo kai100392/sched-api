@@ -3,7 +3,9 @@ from fastapi import FastAPI, HTTPException
 from fastapi.encoders import jsonable_encoder
 from google.oauth2 import id_token
 from google.auth.transport.requests import Request
-from models import SimilarPatient, PatientRequest
+from fastapi import Request as fRequest
+
+from models import SimilarPatient, PatientRequest, UserInfo
 import os
 import requests
 import json
@@ -42,6 +44,15 @@ def hello():
 def health_check():
     return {"message": "Health check ok"}
 
+@app.get("/api/userinfo")
+def get_userinfo(req: fRequest) -> UserInfo:
+    dictHeaders = dict(req.headers)
+    print (dictHeaders)
+    prefix, userEmail = dictHeaders.get("x-goog-authenticated-user-email").split(":", 1)
+    prefix, userId = dictHeaders.get("x-goog-authenticated-user-id").split(":", 1)
+    return { "userEmail": userEmail, "userId": userId }
+
+
 @app.get("/api/cap2/patient-state/{clinic_num}")
 def get_patient(clinic_num: str, callin_date: datetime | None = None, mock: str | None = None) -> PatientRequest:
     """Retrieve and assess patient state, use MRN# 3303923 or 3303925
@@ -73,18 +84,10 @@ def get_patient(clinic_num: str, callin_date: datetime | None = None, mock: str 
     print(pat)
     return pat
 
-# @app.get("/api/cap2/patient-state2/{clinic_num}")
-# def get_patient2(clinic_num: str) -> PatientRequest:
-#     """Retrieve and assess patient state from analysis svc, use MRN# 3303923 or 3303925
-
-#     """
-#     analysis_response = call_analysis_service ("GET", "", f"{ANALYSIS_URL}/cap2/patient-state/{clinic_num}", IAP_CLIENT_ID)
-#     print(analysis_response)
-#     return analysis_response
 
 @app.get("/api/cap3/patient-like-me/{clinic_num}")
 def find_similar_patient(clinic_num: str, mock: str | None = None) -> list [PatientRequest]:
-    """Find similar patients, use MRN# 3303923 or 3303925.  Pass optional parameter mock=Y for mock response
+    """Find similar patients, use MRN# 3303923 or 3303925 in dev.  Pass optional parameter mock=Y for mock response
 
     """
 
@@ -94,53 +97,7 @@ def find_similar_patient(clinic_num: str, mock: str | None = None) -> list [Pati
         return find_similar_patient_mock()
     
     req = get_patient(clinic_num)
-    # req = { 
-    # "PROSTATE_CANCER_VISIT_AGE_FIRST": 75.0, 
-    # "biopsy_1": "URO MR Fusion",
-    # "biopsy_1_days": 58,
-    # "biopsy_1_abnormal": "",
-    # "biopsy_2": "",
-    # "biopsy_2_days": 0,
-    # "biopsy_2_abnormal": "",
-    # "imaging_1": "PET CT SKULL TO THIGH PSMA",
-    # "imaging_1_days": 36, 
-    # "imaging_1_abnormal": "",
-    # "imaging_2": "CT ABDOMEN PELVIS WITH IV CONTRAST",
-    # "imaging_2_days": 41,
-    # "imaging_2_abnormal": "",
-    # "imaging_3": "MR PROSTATE WITHOUT AND WITH IV CONTRAST",
-    # "imaging_3_days": 86.0,
-    # "imaging_3_abnormal": "",
-    # "psa_1": "PROSTATE-SPECIFIC AG (PSA) DIAGNOSTIC, S",
-    # "psa_1_days": 105.0,
-    # "psa_1_value": 43.7,
-    # "psa_1_unit": "ng/mL",
-    # "psa_1_abnormal": "Y",
-    # "psa_2": "",
-    # "psa_2_days": 0.0,
-    # "psa_2_value": 0.0,
-    # "psa_2_unit": "",
-    # "psa_2_abnormal": "",
-    # "psa_3": "",
-    # "psa_3_days": 0.0,
-    # "psa_3_value": 0.0,
-    # "psa_3_unit": "",
-    # "psa_3_abnormal": "",
-    # "psa_4": "",
-    # "psa_4_days": 0.0,
-    # "psa_4_value": 0.0,
-    # "psa_4_unit": "",
-    # "psa_4_abnormal": "",
-    # "psa_recent_increase_percent": 0.0
-    # }
-
     analysis_response = call_analysis_service ("POST", req, f"{ANALYSIS_URL}/cap3/patient-like-me", IAP_CLIENT_ID)
-
-    # retrieve patient data from Clarity for the patients returned above
-    # similar_patients = [ SimilarPatient(clinic_num = 3303923, callin_date = "2020-01-01 10:00", appt_date = "2020-01-05 8:00", PSA = 5, imaging = True, biopsy = "YES", actions = ["consult"]),
-    #                      SimilarPatient(clinic_num = 3303925, callin_date = "2020-02-04 13:00", appt_date = "2020-02-15 9:00", PSA = 9, imaging = True, biopsy = "NO", actions = ["Biopsy", "consult"])
-    #                 ]
-
     print("analysis_response")
     print(json.dumps(analysis_response))
 
