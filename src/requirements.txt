@@ -14,7 +14,7 @@ fastapi
 pandas
 numpy
 db-dtypes
-pg8000
+asyncpg
 langchain_google_vertexai
 langchain_postgres
 langchain_core
