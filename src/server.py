@@ -234,7 +234,7 @@ def postgres():
 
     print(f"postgres called")
     try:
-        vertexai.init(PROJECT_ID, "us-central1")
+        vertexai.init(project="cdh-az-sched-n-328641622107", location="us-central1")
     
         
         CONNECTION_STRING = "postgresql+asyncpg://admin:cdh-az-sched@/patient_cohort_full?host=/cloudsql/cdh-az-sched-n-328641622107:us-central1:az-schedule"
