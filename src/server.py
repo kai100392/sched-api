@@ -237,7 +237,7 @@ def postgres():
         vertexai.init(PROJECT_ID, "us-central1")
     
         
-        CONNECTION_STRING = "postgresql+pg8000://admin:cdh-az-sched@/patient_cohort_full?unix_sock=cdh-az-sched-n-328641622107:us-central1:az-schedule/.s.PGSQL.5432"
+        CONNECTION_STRING = "postgresql+pg8000://admin:cdh-az-sched@/patient_cohort_full?unix_sock=/cloudsql/cdh-az-sched-n-328641622107:us-central1:az-schedule/.s.PGSQL.5432"
         #CONNECTION_STRING = "postgresql+psycopg://admin:cdh-az-sched@34.132.157.239:5432/patient_cohort_full"
         #CONNECTION_STRING = "postgresql+psycopg://langchain:langchain@0.0.0.0:6024/langchain" 
 
