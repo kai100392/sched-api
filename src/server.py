@@ -14,6 +14,17 @@ from bq_utils import get_expanded_patient
 from datetime import datetime
 from fastapi.middleware.cors import CORSMiddleware
 
+from langchain_google_vertexai import VertexAI
+from langchain_postgres.vectorstores import PGVector
+from langchain_core.documents import Document
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
+
+import json
+import vertexai
+import pandas as pd
+import uuid
+
+
 
 print("AZ Sched API - 0.0.1")
 
@@ -215,4 +226,64 @@ def call_analysis_service (method: str, data, analysis_svc_url, client_id):
         print(f"Error calling ${analysis_svc_url}: {e}")
         raise Exception(
                 f"Error calling ${analysis_svc_url}: {e}"
+            )
+
+
+@app.get("/api/postgres")
+def postgres():
+
+    print(f"postgres called")
+    try:
+        vertexai.init(PROJECT_ID, "us-central1")
+    
+        CONNECTION_STRING = "postgresql+psycopg://admin:cdh-az-sched@34.132.157.239:5432/az-schedule"
+        #CONNECTION_STRING = "postgresql+psycopg://langchain:langchain@0.0.0.0:6024/langchain" 
+
+        collection_name = "az_sched_tx"
+
+        embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
+
+        #Replace with text summaries
+        # df = pd.read_csv("./Result_6nwFlags_cat_aggregated.csv")
+        # df['APPT_YEAR'] = pd.to_datetime(df.APPT_TIME).dt.year
+
+        docs = [
+                    Document(page_content='there are cats in the pond', metadata={"id": 1, "location": "pond", "topic": "animals"}),
+                    Document(page_content='ducks are also found in the pond', metadata={"id": 2, "location": "pond", "topic": "animals"}),
+                    Document(page_content='fresh apples are available at the market', metadata={"id": 3, "location": "market", "topic": "food"}),
+                    Document(page_content='the market also sells fresh oranges', metadata={"id": 4, "location": "market", "topic": "food"}),
+                    Document(page_content='the new art exhibit is fascinating', metadata={"id": 5, "location": "museum", "topic": "art"}),
+                    Document(page_content='a sculpture exhibit is also at the museum', metadata={"id": 6, "location": "museum", "topic": "art"}),
+                    Document(page_content='a new coffee shop opened on Main Street', metadata={"id": 7, "location": "Main Street", "topic": "food"}),
+                    Document(page_content='the book club meets at the library', metadata={"id": 8, "location": "library", "topic": "reading"}),
+                    Document(page_content='the library hosts a weekly story time for kids', metadata={"id": 9, "location": "library", "topic": "reading"}),
+                    Document(page_content='a cooking class for beginners is offered at the community center', metadata={"id": 10, "location": "community center", "topic": "classes"})
+                ]
+
+        # for _, row in df.fillna("").iterrows():
+        #     doc = Document(
+        #     # define as necessary
+        #     page_content=json.dumps(row.to_dict(), indent=2),
+        #     metadata=row.to_dict()
+        #     )
+        #     docs.append(doc)
+
+        vectorstore = PGVector(
+            embeddings=embeddings,
+            collection_name=collection_name,
+            connection=CONNECTION_STRING,
+            use_jsonb=True,
+        )
+
+        # vectorstore.add_documents(docs, ids=[str(uuid.uuid4()) for _ in docs], pre_delete_collection=True)
+        vectorstore.add_documents(docs, ids=[doc.metadata['id'] for doc in docs])
+
+        results = vectorstore.similarity_search_with_score(query="class", k=5)
+
+        return results
+
+    except Exception as e:
+        print(f"Error calling postgres exception: {e}")
+        raise Exception(
+                f"Error calling postgres exception: {e}"
             )
