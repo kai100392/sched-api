@@ -14,7 +14,7 @@ fastapi
 pandas
 numpy
 db-dtypes
-psycopg2
+psycopg2-binary
 langchain_google_vertexai
 langchain_postgres
 langchain_core
