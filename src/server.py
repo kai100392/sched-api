@@ -290,3 +290,11 @@ def postgres():
         raise Exception(
                 f"Error calling postgres exception: {e}"
             )
+
+
+
+@app.get("/api/test")
+def test():
+    return call_analysis_service ("GET", "", f"{ANALYSIS_URL}/cap1/test", IAP_CLIENT_ID)
+    
+    
