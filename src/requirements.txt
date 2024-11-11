@@ -20,4 +20,3 @@ langchain_core
 langchain_google_cloud_sql_pg
 SQLAlchemy
 langchain
-langchain_community
