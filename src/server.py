@@ -16,8 +16,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from langchain_google_cloud_sql_pg import PostgresVectorStore, PostgresEngine
 from langchain_google_cloud_sql_pg.indexes import IVFFlatIndex
-# from langchain_google_vertexai import VertexAI, VertexAIEmbeddings
-from langchain.embeddings import VertexAIEmbeddings
+from langchain_google_vertexai import VertexAI, VertexAIEmbeddings
+# from langchain.embeddings import VertexAIEmbeddings
 
 # from langchain_postgres.vectorstores import PGVector
 from langchain_core.documents import Document
