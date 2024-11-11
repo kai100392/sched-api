@@ -17,5 +17,6 @@ db-dtypes
 langchain_google_vertexai
 langchain_postgres
 langchain_core
-langchain_google_genai
-psycopg[binary]
+langchain_google_cloud_sql_pg
+SQLAlchemy
+langchain
