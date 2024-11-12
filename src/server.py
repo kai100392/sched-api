@@ -16,7 +16,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from langchain_google_cloud_sql_pg import PostgresVectorStore, PostgresEngine
 from langchain_google_cloud_sql_pg.indexes import IVFFlatIndex
-from langchain_google_vertexai import VertexAI, VertexAIEmbeddings
+from langchain_google_vertexai import VertexAIEmbeddings
 # from langchain.embeddings import VertexAIEmbeddings
 
 # from langchain_postgres.vectorstores import PGVector
@@ -25,7 +25,7 @@ import sqlalchemy
 import ssl
 
 import json
-import vertexai
+# import vertexai
 import pandas as pd
 import uuid
 
@@ -323,7 +323,7 @@ def postgres():
 
     print(f"postgres called")
     try:
-        vertexai.init(project="cdh-az-sched-n-328641622107", location="us-central1")
+        # vertexai.init(project="cdh-az-sched-n-328641622107", location="us-central1")
 
         INSTANCE_CONNECTION_NAME = f"cdh-az-sched-n-328641622107:us-central1:az-schedule" # i.e demo-project:us-central1:demo-instance
 
