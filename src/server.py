@@ -356,7 +356,7 @@ def postgres():
             # Equivalent URL:
             # postgresql+pg8000://<db_user>:<db_pass>@<db_host>:<db_port>/<db_name>
             sqlalchemy.engine.url.URL.create(
-                drivername="postgresql+pg8000",
+                drivername="postgresql+asyncpg",
                 username=db_user,
                 password=db_pass,
                 host=db_host,
@@ -394,6 +394,8 @@ def postgres():
             # [END_EXCLUDE]
         )
 
+        print(f"PostgresEngine.from_engine_args completed")
+
         # engine = PostgresEngine.from_instance(
         #         project_id ="cdh-az-sched-n-328641622107", 
         #         region= "us-central1", 
@@ -409,6 +411,8 @@ def postgres():
             vector_size=768, # VertexAI model: textembedding-gecko@001
         )
 
+        print(f"init_vectorstore_table completed")
+
         vectorstore = PostgresVectorStore.create_sync(
                     engine,
                     table_name="az_sched_text",
@@ -418,6 +422,8 @@ def postgres():
                     metadata_json_column="cmetadata",
                 )
         
+        print(f"PostgresVectorStore.create_sync completed")
+        
         all_texts = ["Apples and oranges", "Cars and airplanes", "Pineapple", "Train", "Banana"]
 
         metadatas = [{"length": len(t)} for t in all_texts]
@@ -426,9 +432,13 @@ def postgres():
 
         vectorstore.add_texts(all_texts, metadatas=metadatas, ids=ids)
 
+        print(f"add_texts completed")
+
         index = IVFFlatIndex()
 
         vectorstore.apply_vector_index(index)
+
+        print(f"apply_vector_index completed")
 
         query = "I'd like a fruit."
         docs = vectorstore.similarity_search(query)
