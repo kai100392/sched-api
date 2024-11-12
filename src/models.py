@@ -58,4 +58,7 @@ class PatientRequest (BaseModel):
 class UserInfo (BaseModel):
     userEmail: str
     userId: str
-    
+
+class SQLConnection (BaseModel):
+    con_type: str
+    db_host: str
