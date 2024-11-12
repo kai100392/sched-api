@@ -1,11 +1,11 @@
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Body
 from fastapi.encoders import jsonable_encoder
 from google.oauth2 import id_token
 from google.auth.transport.requests import Request
 from fastapi import Request as fRequest
 
-from models import SimilarPatient, PatientRequest, UserInfo
+from models import SimilarPatient, PatientRequest, UserInfo, SQLConnection
 import os
 import requests
 import json
@@ -24,9 +24,9 @@ from langchain_core.documents import Document
 import sqlalchemy
 
 import json
-import vertexai
+# import vertexai
 import pandas as pd
-import uuid
+# import uuid
 
 
 
@@ -384,5 +384,11 @@ def postgres():
 @app.get("/api/test")
 def test():
     return call_analysis_service ("GET", "", f"{ANALYSIS_URL}/cap1/test", IAP_CLIENT_ID)
-    
+
+
+
+@app.post("/api/connect/")
+def test_con(sql_con: SQLConnection = Body(...)):
+    return call_analysis_service ("POST", sql_con, f"{ANALYSIS_URL}/cap1/connect", IAP_CLIENT_ID)
+        
     
