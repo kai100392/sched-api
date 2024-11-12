@@ -62,3 +62,4 @@ class UserInfo (BaseModel):
 class SQLConnection (BaseModel):
     con_type: str
     db_host: str
+    db_name: str
