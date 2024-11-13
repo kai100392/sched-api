@@ -318,6 +318,131 @@ def connect_tcp_socket() -> sqlalchemy.engine.base.Engine:
     )
     return pool
 
+@app.get("/api/test_postgres")
+def test_postgres():
+
+    print(f"test_postgres called")
+    try:
+        # vertexai.init(project="cdh-az-sched-n-328641622107", location="us-central1")
+
+        INSTANCE_CONNECTION_NAME = f"cdh-az-sched-n-328641622107:us-central1:az-schedule" # i.e demo-project:us-central1:demo-instance
+
+        print(f"Instance connection name is: {INSTANCE_CONNECTION_NAME}")
+
+        db_host = os.environ["INSTANCE_HOST"]  # e.g. '127.0.0.1' ('172.17.0.1' if deployed to GAE Flex)
+        db_user = os.environ["DB_USER"]  # e.g. 'my-db-user'
+        db_pass = os.environ["DB_PASS"]  # e.g. 'my-db-password'
+        db_name = os.environ["DB_NAME"]  # e.g. 'my-database'
+        db_port = os.environ["DB_PORT"]  # e.g. 5432
+
+        # db_host = "10.9.0.15"  # e.g. '127.0.0.1' ('172.17.0.1' if deployed to GAE Flex)
+        # db_user = "quickstart-user"  # e.g. 'my-db-user'
+        # db_pass = "quickstart-user" # e.g. 'my-db-password'
+        # db_name = "quickstart-db"  # e.g. 'my-database'
+        # db_port = "5432"  # e.g. 5432
+
+
+        # [END cloud_sql_postgres_sqlalchemy_connect_tcp]
+        connect_args = {}
+        # For deployments that connect directly to a Cloud SQL instance without
+        # using the Cloud SQL Proxy, configuring SSL certificates will ensure the
+        # connection is encrypted.
+
+        if os.environ.get("DB_ROOT_CERT"):
+            db_root_cert = os.environ["DB_ROOT_CERT"]  # e.g. '/path/to/my/server-ca.pem'
+            db_cert = os.environ["DB_CERT"]  # e.g. '/path/to/my/client-cert.pem'
+            db_key = os.environ["DB_KEY"]  # e.g. '/path/to/my/client-key.pem'
+
+            ssl_context = ssl.SSLContext()
+            ssl_context.verify_mode = ssl.CERT_REQUIRED
+            ssl_context.load_verify_locations(db_root_cert)
+            ssl_context.load_cert_chain(db_cert, db_key)
+            connect_args["ssl_context"] = ssl_context
+
+        # db_root_cert = "./certs/server-ca.pem"
+        # db_cert = "./certs/client-cert.pem"
+        # db_key = "./certs/client-key.pem"
+
+        # ssl_context = ssl.SSLContext()
+        # ssl_context.verify_mode = ssl.CERT_REQUIRED
+        # ssl_context.load_verify_locations(db_root_cert)
+        # ssl_context.load_cert_chain(db_cert, db_key)
+        # connect_args["ssl_context"] = ssl_context
+
+        db = sqlalchemy.create_engine(
+        # Equivalent URL:
+        # postgresql+pg8000://<db_user>:<db_pass>@<db_host>:<db_port>/<db_name>
+        sqlalchemy.engine.url.URL.create(
+            drivername="postgresql+pg8000",
+            username=db_user,
+            password=db_pass,
+            host=db_host,
+            port=db_port,
+            database=db_name,
+        ),
+        # [END cloud_sql_postgres_sqlalchemy_connect_tcp]
+        connect_args=connect_args,
+        # [START cloud_sql_postgres_sqlalchemy_connect_tcp]
+        # [START_EXCLUDE]
+        # [START cloud_sql_postgres_sqlalchemy_limit]
+        # Pool size is the maximum number of permanent connections to keep.
+        pool_size=5,
+        # Temporarily exceeds the set pool_size if no connections are available.
+        max_overflow=2,
+        # The total number of concurrent connections for your application will be
+        # a total of pool_size and max_overflow.
+        # [END cloud_sql_postgres_sqlalchemy_limit]
+        # [START cloud_sql_postgres_sqlalchemy_backoff]
+        # SQLAlchemy automatically uses delays between failed connection attempts,
+        # but provides no arguments for configuration.
+        # [END cloud_sql_postgres_sqlalchemy_backoff]
+        # [START cloud_sql_postgres_sqlalchemy_timeout]
+        # 'pool_timeout' is the maximum number of seconds to wait when retrieving a
+        # new connection from the pool. After the specified amount of time, an
+        # exception will be thrown.
+        pool_timeout=30,  # 30 seconds
+        # [END cloud_sql_postgres_sqlalchemy_timeout]
+        # [START cloud_sql_postgres_sqlalchemy_lifetime]
+        # 'pool_recycle' is the maximum number of seconds a connection can persist.
+        # Connections that live longer than the specified amount of time will be
+        # re-established
+        pool_recycle=1800,  # 30 minutes
+        # [END cloud_sql_postgres_sqlalchemy_lifetime]
+        # [END_EXCLUDE]
+        )
+
+        votes = []
+
+        with db.connect() as conn:
+            # Execute the query and fetch all results
+            recent_votes = conn.execute(
+                sqlalchemy.text(
+                    "SELECT candidate, time_cast FROM votes ORDER BY time_cast DESC LIMIT 5"
+                )
+            ).fetchall()
+            # Convert the results into a list of dicts representing votes
+            for row in recent_votes:
+                votes.append({"candidate": row[0], "time_cast": row[1]})
+
+            stmt = sqlalchemy.text(
+                "SELECT COUNT(vote_id) FROM votes WHERE candidate=:candidate"
+            )
+            # Count number of votes for tabs
+            tab_count = conn.execute(stmt, parameters={"candidate": "TABS"}).scalar()
+            # Count number of votes for spaces
+            space_count = conn.execute(stmt, parameters={"candidate": "SPACES"}).scalar()
+
+            return {
+                "space_count": space_count,
+                "recent_votes": votes,
+                "tab_count": tab_count,
+            }
+
+    except Exception as e:
+        print(f"Error calling test_postgres exception: {e}")
+        raise Exception( f"Error calling test_postgres exception: {e}")
+
+
 @app.get("/api/postgres")
 def postgres():
 
@@ -335,11 +460,18 @@ def postgres():
         db_name = os.environ["DB_NAME"]  # e.g. 'my-database'
         db_port = os.environ["DB_PORT"]  # e.g. 5432
 
+        # db_host = "10.9.0.15"  # e.g. '127.0.0.1' ('172.17.0.1' if deployed to GAE Flex)
+        # db_user = "quickstart-user"  # e.g. 'my-db-user'
+        # db_pass = "quickstart-user" # e.g. 'my-db-password'
+        # db_name = "quickstart-db"  # e.g. 'my-database'
+        # db_port = "5432"  # e.g. 5432
+
         # [END cloud_sql_postgres_sqlalchemy_connect_tcp]
         connect_args = {}
         # For deployments that connect directly to a Cloud SQL instance without
         # using the Cloud SQL Proxy, configuring SSL certificates will ensure the
         # connection is encrypted.
+
         if os.environ.get("DB_ROOT_CERT"):
             db_root_cert = os.environ["DB_ROOT_CERT"]  # e.g. '/path/to/my/server-ca.pem'
             db_cert = os.environ["DB_CERT"]  # e.g. '/path/to/my/client-cert.pem'
@@ -350,6 +482,16 @@ def postgres():
             ssl_context.load_verify_locations(db_root_cert)
             ssl_context.load_cert_chain(db_cert, db_key)
             connect_args["ssl_context"] = ssl_context
+
+        # db_root_cert = "./certs/server-ca.pem"
+        # db_cert = "./certs/client-cert.pem"
+        # db_key = "./certs/client-key.pem"
+
+        # ssl_context = ssl.SSLContext()
+        # ssl_context.verify_mode = ssl.CERT_REQUIRED
+        # ssl_context.load_verify_locations(db_root_cert)
+        # ssl_context.load_cert_chain(db_cert, db_key)
+        # connect_args["ssl_context"] = ssl_context
 
         # [START cloud_sql_postgres_sqlalchemy_connect_tcp]
         engine = PostgresEngine.from_engine_args(
