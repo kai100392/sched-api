@@ -22,6 +22,8 @@ from langchain_google_vertexai import VertexAIEmbeddings
 # from langchain_postgres.vectorstores import PGVector
 from langchain_core.documents import Document
 import sqlalchemy
+from sqlalchemy.ext.asyncio import create_async_engine
+
 import ssl
 
 import json
@@ -494,7 +496,8 @@ def postgres():
         # connect_args["ssl_context"] = ssl_context
 
         # [START cloud_sql_postgres_sqlalchemy_connect_tcp]
-        engine = PostgresEngine.from_engine_args(
+
+        engine = create_async_engine(
             # Equivalent URL:
             # postgresql+pg8000://<db_user>:<db_pass>@<db_host>:<db_port>/<db_name>
             sqlalchemy.engine.url.URL.create(
@@ -536,6 +539,8 @@ def postgres():
             # [END_EXCLUDE]
         )
 
+        pg_engine = PostgresEngine.from_engine(engine)
+
         print(f"PostgresEngine.from_engine_args completed")
 
         # engine = PostgresEngine.from_instance(
@@ -548,7 +553,7 @@ def postgres():
         
         embedding_service = VertexAIEmbeddings(model_name="textembedding-gecko@001")
 
-        engine.init_vectorstore_table(
+        pg_engine.init_vectorstore_table(
             table_name="az_sched_text",
             vector_size=768, # VertexAI model: textembedding-gecko@001
         )
@@ -556,7 +561,7 @@ def postgres():
         print(f"init_vectorstore_table completed")
 
         vectorstore = PostgresVectorStore.create_sync(
-                    engine,
+                    pg_engine,
                     table_name="az_sched_text",
                     embedding_service=embedding_service,
                     id_column="id",
