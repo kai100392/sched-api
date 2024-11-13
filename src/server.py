@@ -555,15 +555,18 @@ async def postgres():
         embedding_service = VertexAIEmbeddings(model_name="textembedding-gecko@001")
 
         await pg_engine.ainit_vectorstore_table(
-            table_name="az_sched_text",
+            table_name="az_sched_text_emb",
             vector_size=768, # VertexAI model: textembedding-gecko@001
+            id_column="id",
+            content_column="document",
+            metadata_json_column="cmetadata",
         )
 
         print(f"init_vectorstore_table completed")
 
         vectorstore = await PostgresVectorStore.create(
                     pg_engine,
-                    table_name="az_sched_text",
+                    table_name="az_sched_text_emb",
                     embedding_service=embedding_service,
                     id_column="id",
                     content_column="document",
