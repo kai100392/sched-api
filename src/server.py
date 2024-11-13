@@ -446,10 +446,11 @@ def test_postgres():
 
 
 @app.get("/api/postgres")
-def postgres():
+async def postgres():
 
     print(f"postgres called")
     try:
+
         # vertexai.init(project="cdh-az-sched-n-328641622107", location="us-central1")
 
         INSTANCE_CONNECTION_NAME = f"cdh-az-sched-n-328641622107:us-central1:az-schedule" # i.e demo-project:us-central1:demo-instance
@@ -509,7 +510,7 @@ def postgres():
                 database=db_name,
             ),
             # [END cloud_sql_postgres_sqlalchemy_connect_tcp]
-            connect_args=connect_args,
+            connect_args={"ssl": connect_args["ssl_context"]},
             # [START cloud_sql_postgres_sqlalchemy_connect_tcp]
             # [START_EXCLUDE]
             # [START cloud_sql_postgres_sqlalchemy_limit]
@@ -553,14 +554,14 @@ def postgres():
         
         embedding_service = VertexAIEmbeddings(model_name="textembedding-gecko@001")
 
-        pg_engine.init_vectorstore_table(
+        await pg_engine.ainit_vectorstore_table(
             table_name="az_sched_text",
             vector_size=768, # VertexAI model: textembedding-gecko@001
         )
 
         print(f"init_vectorstore_table completed")
 
-        vectorstore = PostgresVectorStore.create_sync(
+        vectorstore = await PostgresVectorStore.create(
                     pg_engine,
                     table_name="az_sched_text",
                     embedding_service=embedding_service,
@@ -577,29 +578,29 @@ def postgres():
 
         ids = [str(uuid.uuid4()) for _ in all_texts]
 
-        vectorstore.add_texts(all_texts, metadatas=metadatas, ids=ids)
+        await vectorstore.aadd_texts(all_texts, metadatas=metadatas, ids=ids)
 
         print(f"add_texts completed")
 
         index = IVFFlatIndex()
 
-        vectorstore.apply_vector_index(index)
+        await vectorstore.aapply_vector_index(index)
 
         print(f"apply_vector_index completed")
 
         query = "I'd like a fruit."
-        docs = vectorstore.similarity_search(query)
+        docs = await vectorstore.asimilarity_search(query)
 
         print("similarity_search: ")
         print(docs)
 
         query_vector = embedding_service.embed_query(query)
-        docs_search_by_vec = vectorstore.similarity_search_by_vector(query_vector, k=2)
+        docs_search_by_vec = await vectorstore.asimilarity_search_by_vector(query_vector, k=2)
         print("similarity_search_by_vector: ")
         print(docs_search_by_vec)
 
         query_vector = embedding_service.embed_query(query)
-        docs_search_by_vec_filter = vectorstore.similarity_search_by_vector(query_vector, k=2, filter="len >= 10")
+        docs_search_by_vec_filter = await vectorstore.asimilarity_search_by_vector(query_vector, k=2, filter="len >= 10")
         print("similarity_search_by_vec_filter: ")
         print(docs_search_by_vec_filter)
         
