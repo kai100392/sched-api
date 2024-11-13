@@ -444,7 +444,11 @@ async def postgres():
     print(f"postgres called")
     try:
 
+        print(f"trying to initiate vertex ai in project {os.environ["AIF_PROJECT_ID"]} loaction {os.environ["AIF_PROJECT_LOCATION"]}")
+
         vertexai.init(project=os.environ["AIF_PROJECT_ID"], location=os.environ["AIF_PROJECT_LOCATION"])
+
+        print(f"vertex ai initiated")
         
         db_host = os.environ["INSTANCE_HOST"]  # e.g. '127.0.0.1' ('172.17.0.1' if deployed to GAE Flex)
         db_user = os.environ["DB_USER"]  # e.g. 'my-db-user'
