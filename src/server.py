@@ -17,17 +17,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from langchain_google_cloud_sql_pg import PostgresVectorStore, PostgresEngine
 from langchain_google_cloud_sql_pg.indexes import IVFFlatIndex
 from langchain_google_vertexai import VertexAIEmbeddings
-# from langchain.embeddings import VertexAIEmbeddings
-
-# from langchain_postgres.vectorstores import PGVector
 from langchain_core.documents import Document
 import sqlalchemy
 from sqlalchemy.ext.asyncio import create_async_engine
-
 import ssl
-
 import json
-# import vertexai
+from google.cloud import aiplatform
+import vertexai
 import pandas as pd
 from uuid import uuid4
 
@@ -325,12 +321,8 @@ def test_postgres():
 
     print(f"test_postgres called")
     try:
-        # vertexai.init(project="cdh-az-sched-n-328641622107", location="us-central1")
-
-        INSTANCE_CONNECTION_NAME = f"cdh-az-sched-n-328641622107:us-central1:az-schedule" # i.e demo-project:us-central1:demo-instance
-
-        print(f"Instance connection name is: {INSTANCE_CONNECTION_NAME}")
-
+        # vertexai.init(project=os.environ["AIF_PROJECT_ID"], location=os.environ["AIF_PROJECT_LOCATION"])
+      
         db_host = os.environ["INSTANCE_HOST"]  # e.g. '127.0.0.1' ('172.17.0.1' if deployed to GAE Flex)
         db_user = os.environ["DB_USER"]  # e.g. 'my-db-user'
         db_pass = os.environ["DB_PASS"]  # e.g. 'my-db-password'
@@ -343,6 +335,7 @@ def test_postgres():
         # db_name = "quickstart-db"  # e.g. 'my-database'
         # db_port = "5432"  # e.g. 5432
 
+        print(f"Instance Host name is: {db_host}")
 
         # [END cloud_sql_postgres_sqlalchemy_connect_tcp]
         connect_args = {}
@@ -451,12 +444,8 @@ async def postgres():
     print(f"postgres called")
     try:
 
-        # vertexai.init(project="cdh-az-sched-n-328641622107", location="us-central1")
-
-        INSTANCE_CONNECTION_NAME = f"cdh-az-sched-n-328641622107:us-central1:az-schedule" # i.e demo-project:us-central1:demo-instance
-
-        print(f"Instance connection name is: {INSTANCE_CONNECTION_NAME}")
-
+        vertexai.init(project=os.environ["AIF_PROJECT_ID"], location=os.environ["AIF_PROJECT_LOCATION"])
+        
         db_host = os.environ["INSTANCE_HOST"]  # e.g. '127.0.0.1' ('172.17.0.1' if deployed to GAE Flex)
         db_user = os.environ["DB_USER"]  # e.g. 'my-db-user'
         db_pass = os.environ["DB_PASS"]  # e.g. 'my-db-password'
@@ -468,6 +457,8 @@ async def postgres():
         # db_pass = "quickstart-user" # e.g. 'my-db-password'
         # db_name = "quickstart-db"  # e.g. 'my-database'
         # db_port = "5432"  # e.g. 5432
+
+        print(f"Instance Host name is: {db_host}")
 
         # [END cloud_sql_postgres_sqlalchemy_connect_tcp]
         connect_args = {}
