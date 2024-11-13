@@ -29,7 +29,7 @@ import ssl
 import json
 # import vertexai
 import pandas as pd
-# import uuid
+from uuid import uuid4
 
 print("AZ Sched API - 0.0.1")
 
@@ -579,7 +579,7 @@ async def postgres():
 
         metadatas = [{"length": len(t)} for t in all_texts]
 
-        ids = [str(uuid.uuid4()) for _ in all_texts]
+        ids = [str(uuid4()) for _ in all_texts]
 
         await vectorstore.aadd_texts(all_texts, metadatas=metadatas, ids=ids)
 
