@@ -14,13 +14,3 @@ fastapi[standard]
 pandas
 numpy
 db-dtypes
-langchain_google_vertexai
-langchain_postgres
-langchain_core
-langchain_google_cloud_sql_pg
-# SQLAlchemy
-langchain
-
-psycopg2-binary
-sqlalchemy
-cloud-sql-python-connector[pg8000]
