@@ -27,6 +27,7 @@ COPY --from=python-build /app .
 RUN python --version
 COPY src/ .
 COPY scripts/gunicorn-start.sh .
+COPY ./certs /app/certs
 RUN chmod 777 gunicorn-start.sh
 ENV PYTHONUNBUFFERED=1
 ENV PORT=5001
