@@ -117,6 +117,10 @@ def find_similar_patient(clinic_num: str, mock: str | None = None) -> list [Pati
     print(response)
     return response
 
+@app.get("/api/cap1/load")
+def load_db():
+    return call_analysis_service ("GET", "", f"{ANALYSIS_URL}/cap1/load", IAP_CLIENT_ID)
+
 def find_similar_patient_mock () -> list [PatientRequest]:
     """Find similar patients calling analysis mock endpoint (not calling vertex search)
 
