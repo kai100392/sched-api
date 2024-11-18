@@ -4,7 +4,7 @@ from pydantic import BaseModel
 
 class PatientRequest(BaseModel):
     APPT_TIME: str | None = None
-    CE_data: bool | False = False
+    CE_data: bool | None = False
     PROSTATE_CANCER_ENC_APPT_DEP_SPECIALTY_FIRST: str | None = None
     PROSTATE_CANCER_ENC_APPT_PRC_ID_FIRST: str | None = None
     PROSTATE_CANCER_ENC_VISIT_NAME_FIRST: str | None = None

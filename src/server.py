@@ -5,7 +5,7 @@ from google.oauth2 import id_token
 from google.auth.transport.requests import Request
 from fastapi import Request as fRequest
 
-from models import SimilarPatient, PatientRequest, UserInfo, SQLConnection
+from models import PatientRequest, PatientAnalysis, UserInfo, SQLConnection
 import os
 import requests
 import json
@@ -54,7 +54,7 @@ def get_userinfo(req: fRequest) -> UserInfo:
 
 @app.get("/api/cap2/patient-state/{clinic_num}")
 def get_patient(clinic_num: str, callin_date: datetime | None = None, mock: str | None = None) -> PatientRequest:
-    """Retrieve and assess patient state, use MRN# 3303923 or 3303925
+    """Retrieve and assess patient state, use MRN# 3-303-923 or 3-303-925 in dev (dash required)
 
     """
 
@@ -85,8 +85,8 @@ def get_patient(clinic_num: str, callin_date: datetime | None = None, mock: str 
 
 
 @app.get("/api/cap3/patient-like-me/{clinic_num}")
-def find_similar_patient(clinic_num: str, mock: str | None = None) -> list [PatientRequest]:
-    """Find similar patients, use MRN# 3303923 or 3303925 in dev.  Pass optional parameter mock=Y for mock response
+def find_similar_patient(clinic_num: str, mock: str | None = None) -> PatientAnalysis:
+    """Find similar patients, use MRN# 3-303-923 or 3-303-925 in dev (dash required).  Pass optional parameter mock=Y for mock response
 
     """
 
@@ -99,23 +99,24 @@ def find_similar_patient(clinic_num: str, mock: str | None = None) -> list [Pati
     analysis_response = call_analysis_service ("POST", req, f"{ANALYSIS_URL}/cap3/patient-like-me", IAP_CLIENT_ID)
     print("analysis_response")
     print(json.dumps(analysis_response))
+    return analysis_response
 
-    response = []
-    for r in analysis_response["similar_patients"]:
-        # p = SimilarPatient(
-        #     clinic_num = r ["clinic_num"],
-        #     callin_date = "callin date",
-        #     appt_date = "appt date",
-        #     PSA = 8.5,
-        #     imaging = False,
-        #     biopsy = "biopsy",
-        #     actions = ["biopsy", "consult"]
-        # )
-        p = req
-        # p = get_patient(clinic_num)
-        response.append(p)
-    print(response)
-    return response
+    # response = []
+    # for r in analysis_response["similar_patients"]:
+    #     # p = SimilarPatient(
+    #     #     clinic_num = r ["clinic_num"],
+    #     #     callin_date = "callin date",
+    #     #     appt_date = "appt date",
+    #     #     PSA = 8.5,
+    #     #     imaging = False,
+    #     #     biopsy = "biopsy",
+    #     #     actions = ["biopsy", "consult"]
+    #     # )
+    #     p = req
+    #     # p = get_patient(clinic_num)
+    #     response.append(p)
+    # print(response)
+    # return response
 
 @app.get("/api/cap1/load")
 def load_db():
