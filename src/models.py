@@ -125,6 +125,7 @@ class Recommendations(BaseModel):
 
 
 class PatientAnalysis(BaseModel):
+    CURRENT_PATIENT: PatientRequest
     SIMILAR_PATIENTS: list[SimilarPatient] = []
     SIMILARITY_METRIC: SimilarityMetric = {}
     RECOMMENDATIONS: Recommendations
