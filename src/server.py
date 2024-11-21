@@ -53,31 +53,20 @@ def get_userinfo(req: fRequest) -> UserInfo:
 
 
 @app.get("/api/cap2/patient-state/{clinic_num}")
-def get_patient(clinic_num: str, callin_date: datetime | None = None, mock: str | None = None) -> PatientRequest:
+def get_patient(clinic_num: str, callin_date: datetime | None = None) -> PatientRequest:
     """Retrieve and assess patient state, use MRN# 3-303-923 or 3-303-925 in dev (dash required)
 
     """
 
-    print (f"retrieving patient data for {clinic_num}, callin_date={callin_date}, mock={mock}")
+    print (f"retrieving patient data for {clinic_num}, callin_date={callin_date}")
     if not callin_date:
         callin_date = datetime.now()
 
     pat = None
-    if mock and mock == 'Y':
-        bq_client = bigquery.Client(project=PROJECT_ID)
-        QUERY_TEMPLATE = f"""
-                SELECT * FROM `{PROJECT_ID}.phi_azsched_us.expanded_patient_cohort`
-                where PAT_MRN_ID = "{clinic_num}";
-                """
-        query = QUERY_TEMPLATE
-        query_job = bq_client.query(query)
-        for row in query_job:
-            pat = dict(row.items())
-    else:
-        patlist = get_expanded_patient (clinic_num, callin_date, ENV)
-        print(patlist)
-        if len(patlist) > 0:
-            pat = patlist[0]
+    patlist = get_expanded_patient (clinic_num, callin_date, ENV)
+    print(patlist)
+    if len(patlist) > 0:
+        pat = patlist[0]
     if pat == None:
         raise HTTPException(status_code=404, detail="Patient not found")
     print(pat)
@@ -85,78 +74,22 @@ def get_patient(clinic_num: str, callin_date: datetime | None = None, mock: str 
 
 
 @app.get("/api/cap3/patient-like-me/{clinic_num}")
-def find_similar_patient(clinic_num: str, mock: str | None = None) -> PatientAnalysis:
-    """Find similar patients, use MRN# 3-303-923 or 3-303-925 in dev (dash required).  Pass optional parameter mock=Y for mock response
+def find_similar_patient(clinic_num: str) -> PatientAnalysis:
+    """Find similar patients, use MRN# 3-303-923 or 3-303-925 in dev (dash required).
 
     """
 
-    print(f"find_similar_patient ({clinic_num}, mock={mock})")
+    print(f"find_similar_patient ({clinic_num})")
 
-    if mock and mock == 'Y':
-        return find_similar_patient_mock()
-    
     req = get_patient(clinic_num)
     analysis_response = call_analysis_service ("POST", req, f"{ANALYSIS_URL}/cap3/patient-like-me", IAP_CLIENT_ID)
     print("analysis_response")
     print(json.dumps(analysis_response))
     return analysis_response
 
-    # response = []
-    # for r in analysis_response["similar_patients"]:
-    #     # p = SimilarPatient(
-    #     #     clinic_num = r ["clinic_num"],
-    #     #     callin_date = "callin date",
-    #     #     appt_date = "appt date",
-    #     #     PSA = 8.5,
-    #     #     imaging = False,
-    #     #     biopsy = "biopsy",
-    #     #     actions = ["biopsy", "consult"]
-    #     # )
-    #     p = req
-    #     # p = get_patient(clinic_num)
-    #     response.append(p)
-    # print(response)
-    # return response
-
 @app.get("/api/cap1/load")
 def load_db():
     return call_analysis_service ("GET", "", f"{ANALYSIS_URL}/cap1/load", IAP_CLIENT_ID)
-
-def find_similar_patient_mock () -> list [PatientRequest]:
-    """Find similar patients calling analysis mock endpoint (not calling vertex search)
-
-    """
-    req = { 
-        "PROSTATE_CANCER_VISIT_AGE_FIRST": 75.0, 
-        "biopsy_1": "URO MR Fusion",
-        "biopsy_1_days": 58,
-        "imaging_1": "PET CT SKULL TO THIGH PSMA",
-        "imaging_1_days": 36, 
-        "imaging_2": "CT ABDOMEN PELVIS WITH IV CONTRAST",
-        "imaging_2_days": 41,
-        "imaging_2_abnormal": true,
-        "imaging_3": "MR PROSTATE WITHOUT AND WITH IV CONTRAST",
-        "imaging_3_days": 86.0,
-        "psa_1": "PROSTATE-SPECIFIC AG (PSA) DIAGNOSTIC, S",
-        "psa_1_days": 105.0,
-        "psa_1_value": 43.7,
-        "psa_1_unit": "ng/mL",
-        "psa_1_abnormal": false,
-        "psa_recent_increase_percent": 0.0
-    }
-
-    print("find_similar_patient_mock")
-    analysis_response = call_analysis_service ("POST", req, f"{ANALYSIS_URL}/cap3/patient-like-me/mock", IAP_CLIENT_ID)
-    print("analysis_response")
-    print(json.dumps(analysis_response))
-
-    response = []
-    for r in analysis_response["similar_patients"]:
-        print(r)
-        p = get_patient(r["clinic_num"], mock="Y")
-        response.append(p)
-    print(response)
-    return response 
 
 def call_analysis_service (method: str, data, analysis_svc_url, client_id):
     print("Inside call_analysis_service")
