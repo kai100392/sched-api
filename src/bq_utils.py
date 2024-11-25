@@ -294,7 +294,7 @@ def get_env_project_dataset(env) :
 
 def get_query_by_env(env, proj, dataset, call_in_date, mcn):
     query = ""
-    if env == 'd':
+    if env == 'd' or env == 'n':
         query = f"""
         SELECT PAT.PAT_ID, PAT.PAT_MRN_ID, 
         DATE_DIFF(date('{call_in_date.strftime('%Y-%m-%d')}'), date(PAT.BIRTH_DATE), year) as PROSTATE_CANCER_VISIT_AGE_FIRST, 
