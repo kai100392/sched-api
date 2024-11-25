@@ -14,7 +14,7 @@ from bq_utils import get_expanded_patient
 from datetime import datetime
 from fastapi.middleware.cors import CORSMiddleware
 
-print("AZ Sched API - 0.0.1")
+print("AZ Sched API - 0.0.2")
 
 ANALYSIS_URL = os.getenv("ANALYSIS_URL", "https://sched-analysis-svc-493590485586.us-central1.run.app/analysis")
 PROJECT_ID = os.getenv("PROJECT_ID", "cdh-az-sched-n-328641622107")
