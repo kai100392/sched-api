@@ -38,15 +38,33 @@ def process_patient_group(group_, call_in_date):
     group_outofscope = group_[(pd.to_datetime(group_['ORDER_TIME']) > first_urology_visit)].copy()
 
     patient_data = {'PAT_MRN_ID': group_['PAT_MRN_ID'].iloc[0]}
-    patient_data['APPT_TIME'] = group_['PROSTATE_CANCER_ENC_APPT_TIME_FIRST'].min()
-    patient_data['PROSTATE_CANCER_ENC_VISIT_NAME_FIRST'] = group_['PROSTATE_CANCER_ENC_VISIT_NAME_FIRST'].min()
-    patient_data['PROSTATE_CANCER_VISIT_AGE_FIRST'] = group_['PROSTATE_CANCER_VISIT_AGE_FIRST'].min()
-    patient_data['PROSTATE_CANCER_REQUEST_METHOD_C_FIRST'] = group_['PROSTATE_CANCER_REQUEST_METHOD_C_FIRST'].min()
-    patient_data['PROSTATE_CANCER_ENC_APPT_PRC_ID_FIRST'] = group_['PROSTATE_CANCER_ENC_APPT_PRC_ID_FIRST'].min()
-    patient_data['PROSTATE_CANCER_ENC_APPT_DEP_SPECIALTY_FIRST'] = group_['PROSTATE_CANCER_ENC_APPT_DEP_SPECIALTY_FIRST'].min()
-    patient_data['PROSTATE_CANCER_REFERRAL_CLASS'] = group_['PROSTATE_CANCER_REFERRAL_CLASS'].min()
-    patient_data['icd_10_1'] = group_['icd_10_1'].min()
-    patient_data['icd_10_2'] = group_['icd_10_2'].min()
+    
+    if 'PROSTATE_CANCER_ENC_APPT_TIME_FIRST' in group_.columns:
+        patient_data['APPT_TIME'] = group_['PROSTATE_CANCER_ENC_APPT_TIME_FIRST'].min()
+    
+    if 'PROSTATE_CANCER_ENC_VISIT_NAME_FIRST' in group_.columns:
+        patient_data['PROSTATE_CANCER_ENC_VISIT_NAME_FIRST'] = group_['PROSTATE_CANCER_ENC_VISIT_NAME_FIRST'].min()
+
+    if 'PROSTATE_CANCER_VISIT_AGE_FIRST' in group_.columns:
+        patient_data['PROSTATE_CANCER_VISIT_AGE_FIRST'] = group_['PROSTATE_CANCER_VISIT_AGE_FIRST'].min()
+
+    if 'PROSTATE_CANCER_REQUEST_METHOD_C_FIRST' in group_.columns:
+        patient_data['PROSTATE_CANCER_REQUEST_METHOD_C_FIRST'] = group_['PROSTATE_CANCER_REQUEST_METHOD_C_FIRST'].min()
+
+    if 'PROSTATE_CANCER_ENC_APPT_PRC_ID_FIRST' in group_.columns:
+        patient_data['PROSTATE_CANCER_ENC_APPT_PRC_ID_FIRST'] = group_['PROSTATE_CANCER_ENC_APPT_PRC_ID_FIRST'].min()
+
+    if 'PROSTATE_CANCER_ENC_APPT_DEP_SPECIALTY_FIRST' in group_.columns:
+        patient_data['PROSTATE_CANCER_ENC_APPT_DEP_SPECIALTY_FIRST'] = group_['PROSTATE_CANCER_ENC_APPT_DEP_SPECIALTY_FIRST'].min()
+
+    if 'PROSTATE_CANCER_REFERRAL_CLASS' in group_.columns:
+        patient_data['PROSTATE_CANCER_REFERRAL_CLASS'] = group_['PROSTATE_CANCER_REFERRAL_CLASS'].min()
+
+    if 'icd_10_1' in group_.columns:
+        patient_data['icd_10_1'] = group_['icd_10_1'].min()
+
+    if 'icd_10_2' in group_.columns:
+        patient_data['icd_10_2'] = group_['icd_10_2'].min()
 
 
     if not group.empty:
@@ -374,7 +392,7 @@ def get_sql_patient(mcn, call_in_date, env):
         raise ValueError(f"project or dataset is not set.  Check the env parameter to ensure it is correct.  Should be d or p.  Your value was {env} ")
     
     query = get_query_by_env(env, proj, dataset, call_in_date, mcn)
-       
+
     # Run the query and get the results
     query_job = client.query(query)
     results = query_job.result()
