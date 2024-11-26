@@ -1,11 +1,11 @@
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Body
 from fastapi.encoders import jsonable_encoder
 from google.oauth2 import id_token
 from google.auth.transport.requests import Request
 from fastapi import Request as fRequest
 
-from models import SimilarPatient, PatientRequest, UserInfo
+from models import PatientRequest, PatientAnalysis, UserInfo, SQLConnection
 import os
 import requests
 import json
@@ -14,19 +14,7 @@ from bq_utils import get_expanded_patient
 from datetime import datetime
 from fastapi.middleware.cors import CORSMiddleware
 
-from langchain_google_vertexai import VertexAI
-from langchain_postgres.vectorstores import PGVector
-from langchain_core.documents import Document
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
-
-import json
-import vertexai
-import pandas as pd
-import uuid
-
-
-
-print("AZ Sched API - 0.0.1")
+print("AZ Sched API - 0.0.2")
 
 ANALYSIS_URL = os.getenv("ANALYSIS_URL", "https://sched-analysis-svc-493590485586.us-central1.run.app/analysis")
 PROJECT_ID = os.getenv("PROJECT_ID", "cdh-az-sched-n-328641622107")
@@ -65,31 +53,20 @@ def get_userinfo(req: fRequest) -> UserInfo:
 
 
 @app.get("/api/cap2/patient-state/{clinic_num}")
-def get_patient(clinic_num: str, callin_date: datetime | None = None, mock: str | None = None) -> PatientRequest:
-    """Retrieve and assess patient state, use MRN# 3303923 or 3303925
+def get_patient(clinic_num: str, callin_date: datetime | None = None) -> PatientRequest:
+    """Retrieve and assess patient state, use MRN# 3-303-923 or 3-303-925 in dev (dash required)
 
     """
 
-    print (f"retrieving patient data for {clinic_num}, callin_date={callin_date}, mock={mock}")
+    print (f"retrieving patient data for {clinic_num}, callin_date={callin_date}")
     if not callin_date:
         callin_date = datetime.now()
 
     pat = None
-    if mock and mock == 'Y':
-        bq_client = bigquery.Client(project=PROJECT_ID)
-        QUERY_TEMPLATE = f"""
-                SELECT * FROM `{PROJECT_ID}.phi_azsched_us.expanded_patient_cohort`
-                where PAT_MRN_ID = "{clinic_num}";
-                """
-        query = QUERY_TEMPLATE
-        query_job = bq_client.query(query)
-        for row in query_job:
-            pat = dict(row.items())
-    else:
-        patlist = get_expanded_patient (clinic_num, callin_date, ENV)
-        print(patlist)
-        if len(patlist) > 0:
-            pat = patlist[0]
+    patlist = get_expanded_patient (clinic_num, callin_date, ENV)
+    print(patlist)
+    if len(patlist) > 0:
+        pat = patlist[0]
     if pat == None:
         raise HTTPException(status_code=404, detail="Patient not found")
     print(pat)
@@ -97,94 +74,22 @@ def get_patient(clinic_num: str, callin_date: datetime | None = None, mock: str 
 
 
 @app.get("/api/cap3/patient-like-me/{clinic_num}")
-def find_similar_patient(clinic_num: str, mock: str | None = None) -> list [PatientRequest]:
-    """Find similar patients, use MRN# 3303923 or 3303925 in dev.  Pass optional parameter mock=Y for mock response
+def find_similar_patient(clinic_num: str) -> PatientAnalysis:
+    """Find similar patients, use MRN# 3-303-923 or 3-303-925 in dev (dash required).
 
     """
 
-    print(f"find_similar_patient ({clinic_num}, mock={mock})")
+    print(f"find_similar_patient ({clinic_num})")
 
-    if mock and mock == 'Y':
-        return find_similar_patient_mock()
-    
     req = get_patient(clinic_num)
     analysis_response = call_analysis_service ("POST", req, f"{ANALYSIS_URL}/cap3/patient-like-me", IAP_CLIENT_ID)
     print("analysis_response")
     print(json.dumps(analysis_response))
+    return analysis_response
 
-    response = []
-    for r in analysis_response["similar_patients"]:
-        # p = SimilarPatient(
-        #     clinic_num = r ["clinic_num"],
-        #     callin_date = "callin date",
-        #     appt_date = "appt date",
-        #     PSA = 8.5,
-        #     imaging = False,
-        #     biopsy = "biopsy",
-        #     actions = ["biopsy", "consult"]
-        # )
-        p = req
-        # p = get_patient(clinic_num)
-        response.append(p)
-    print(response)
-    return response
-
-def find_similar_patient_mock () -> list [PatientRequest]:
-    """Find similar patients calling analysis mock endpoint (not calling vertex search)
-
-    """
-    req = { 
-        "PROSTATE_CANCER_VISIT_AGE_FIRST": 75.0, 
-        "biopsy_1": "URO MR Fusion",
-        "biopsy_1_days": 58,
-        "biopsy_1_abnormal": "",
-        "biopsy_2": "",
-        "biopsy_2_days": 0,
-        "biopsy_2_abnormal": "",
-        "imaging_1": "PET CT SKULL TO THIGH PSMA",
-        "imaging_1_days": 36, 
-        "imaging_1_abnormal": "",
-        "imaging_2": "CT ABDOMEN PELVIS WITH IV CONTRAST",
-        "imaging_2_days": 41,
-        "imaging_2_abnormal": "",
-        "imaging_3": "MR PROSTATE WITHOUT AND WITH IV CONTRAST",
-        "imaging_3_days": 86.0,
-        "imaging_3_abnormal": "",
-        "psa_1": "PROSTATE-SPECIFIC AG (PSA) DIAGNOSTIC, S",
-        "psa_1_days": 105.0,
-        "psa_1_value": 43.7,
-        "psa_1_unit": "ng/mL",
-        "psa_1_abnormal": "Y",
-        "psa_2": "",
-        "psa_2_days": 0.0,
-        "psa_2_value": 0.0,
-        "psa_2_unit": "",
-        "psa_2_abnormal": "",
-        "psa_3": "",
-        "psa_3_days": 0.0,
-        "psa_3_value": 0.0,
-        "psa_3_unit": "",
-        "psa_3_abnormal": "",
-        "psa_4": "",
-        "psa_4_days": 0.0,
-        "psa_4_value": 0.0,
-        "psa_4_unit": "",
-        "psa_4_abnormal": "",
-        "psa_recent_increase_percent": 0.0
-    }
-
-    print("find_similar_patient_mock")
-    analysis_response = call_analysis_service ("POST", req, f"{ANALYSIS_URL}/cap3/patient-like-me/mock", IAP_CLIENT_ID)
-    print("analysis_response")
-    print(json.dumps(analysis_response))
-
-    response = []
-    for r in analysis_response["similar_patients"]:
-        print(r)
-        p = get_patient(r["clinic_num"], mock="Y")
-        response.append(p)
-    print(response)
-    return response 
+@app.get("/api/cap1/load")
+def load_db():
+    return call_analysis_service ("GET", "", f"{ANALYSIS_URL}/cap1/load", IAP_CLIENT_ID)
 
 def call_analysis_service (method: str, data, analysis_svc_url, client_id):
     print("Inside call_analysis_service")
@@ -228,73 +133,12 @@ def call_analysis_service (method: str, data, analysis_svc_url, client_id):
                 f"Error calling ${analysis_svc_url}: {e}"
             )
 
-
-@app.get("/api/postgres")
-def postgres():
-
-    print(f"postgres called")
-    try:
-        vertexai.init(project="cdh-az-sched-n-328641622107", location="us-central1")
-    
-        
-        #CONNECTION_STRING = "postgresql+asyncpg://admin:cdh-az-sched@/patient_cohort_full?host=/cloudsql/cdh-az-sched-n-328641622107:us-central1:az-schedule"
-        #CONNECTION_STRING = "postgresql+pg8000://admin:cdh-az-sched@/patient_cohort_full?unix_sock=/cloudsql/cdh-az-sched-n-328641622107:us-central1:az-schedule/.s.PGSQL.5432"
-        CONNECTION_STRING = "postgresql+psycopg://admin:cdh-az-sched@34.132.157.239:5432/patient_cohort_full"
-        #CONNECTION_STRING = "postgresql+psycopg://langchain:langchain@0.0.0.0:6024/langchain" 
-
-        collection_name = "az_sched_tx"
-
-        embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
-
-        #Replace with text summaries
-        # df = pd.read_csv("./Result_6nwFlags_cat_aggregated.csv")
-        # df['APPT_YEAR'] = pd.to_datetime(df.APPT_TIME).dt.year
-
-        docs = [
-                    Document(page_content='there are cats in the pond', metadata={"id": 1, "location": "pond", "topic": "animals"}),
-                    Document(page_content='ducks are also found in the pond', metadata={"id": 2, "location": "pond", "topic": "animals"}),
-                    Document(page_content='fresh apples are available at the market', metadata={"id": 3, "location": "market", "topic": "food"}),
-                    Document(page_content='the market also sells fresh oranges', metadata={"id": 4, "location": "market", "topic": "food"}),
-                    Document(page_content='the new art exhibit is fascinating', metadata={"id": 5, "location": "museum", "topic": "art"}),
-                    Document(page_content='a sculpture exhibit is also at the museum', metadata={"id": 6, "location": "museum", "topic": "art"}),
-                    Document(page_content='a new coffee shop opened on Main Street', metadata={"id": 7, "location": "Main Street", "topic": "food"}),
-                    Document(page_content='the book club meets at the library', metadata={"id": 8, "location": "library", "topic": "reading"}),
-                    Document(page_content='the library hosts a weekly story time for kids', metadata={"id": 9, "location": "library", "topic": "reading"}),
-                    Document(page_content='a cooking class for beginners is offered at the community center', metadata={"id": 10, "location": "community center", "topic": "classes"})
-                ]
-
-        # for _, row in df.fillna("").iterrows():
-        #     doc = Document(
-        #     # define as necessary
-        #     page_content=json.dumps(row.to_dict(), indent=2),
-        #     metadata=row.to_dict()
-        #     )
-        #     docs.append(doc)
-
-        vectorstore = PGVector(
-            embeddings=embeddings,
-            collection_name=collection_name,
-            connection=CONNECTION_STRING,
-            use_jsonb=True,
-        )
-
-        # vectorstore.add_documents(docs, ids=[str(uuid.uuid4()) for _ in docs], pre_delete_collection=True)
-        vectorstore.add_documents(docs, ids=[doc.metadata['id'] for doc in docs])
-
-        results = vectorstore.similarity_search_with_score(query="class", k=5)
-
-        return results
-
-    except Exception as e:
-        print(f"Error calling postgres exception: {e}")
-        raise Exception(
-                f"Error calling postgres exception: {e}"
-            )
-
-
-
 @app.get("/api/test")
 def test():
     return call_analysis_service ("GET", "", f"{ANALYSIS_URL}/cap1/test", IAP_CLIENT_ID)
-    
+
+@app.post("/api/connect/")
+def test_con(sql_con: SQLConnection = Body(...)):
+    return call_analysis_service ("POST", sql_con, f"{ANALYSIS_URL}/cap1/connect", IAP_CLIENT_ID)
+        
     
