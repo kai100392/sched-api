@@ -119,25 +119,32 @@ def update_df(df,call_in_date):
     else:
         final_df = final_df.unstack().reset_index()
 
-    bi = [-730, -180, -60, -30, -10, 0]
-    bl = ['long ago', 'months ago', 'a month ago', 'a few weeks ago', 'days ago']
-    for series_name, series in final_df.loc[:, final_df.columns.str.contains('_days')].iloc[:, :9].items():
-        final_df[series_name + '_cat'] = pd.cut(series, bins=bi, labels=bl)
+    # Ensure all column names are strings
+    final_df.columns = final_df.columns.astype(str)
+    
+    if any('_days' in col for col in final_df.columns):
+        bi = [-730, -180, -60, -30, -10, 0]
+        bl = ['long ago', 'months ago', 'a month ago', 'a few weeks ago', 'days ago']
+        for series_name, series in final_df.loc[:, final_df.columns.str.contains('_days')].iloc[:, :9].items():
+            final_df[series_name + '_cat'] = pd.cut(series, bins=bi, labels=bl)
+    
+    if any('_value' in col for col in final_df.columns):
+        bvi = [0, 2, 4, 10, 20, 1000]
+        bvl = ['low', 'medium', 'med-high', 'high', 'very high']
+        for series_name, series in final_df.loc[:, final_df.columns.str.contains('_value')].items():
+            final_df[series_name + '_cat'] = pd.cut(series, bins=bvi, labels=bvl)
 
-    bvi = [0, 2, 4, 10, 20, 1000]
-    bvl = ['low', 'medium', 'med-high', 'high', 'very high']
-    for series_name, series in final_df.loc[:, final_df.columns.str.contains('_value')].items():
-        final_df[series_name + '_cat'] = pd.cut(series, bins=bvi, labels=bvl)
-
-    bpi = [-10000, -50, -10, 10, 50, 10000]
-    bpl = ['decreased a lot', 'slightly decreased', 'not changed', 'slightly increased', 'increased a lot']
-    for series_name, series in final_df.loc[:, final_df.columns.str.contains('_percent')].items():
-        final_df[series_name + '_cat'] = pd.cut(series, bins=bpi, labels=bpl)
-
-    bai = [0, 40, 50, 60, 70, 80, 120]
-    bal = ['below 40s', 'in 40s', 'in 50s', 'in 60s', 'in 70s', 'above 80s']
-    for series_name, series in final_df.loc[:, final_df.columns.str.contains('_AGE_')].items():
-        final_df[series_name + '_cat'] = pd.cut(series, bins=bai, labels=bal)
+    if any('_percent' in col for col in final_df.columns):
+        bpi = [-10000, -50, -10, 10, 50, 10000]
+        bpl = ['decreased a lot', 'slightly decreased', 'not changed', 'slightly increased', 'increased a lot']
+        for series_name, series in final_df.loc[:, final_df.columns.str.contains('_percent')].items():
+            final_df[series_name + '_cat'] = pd.cut(series, bins=bpi, labels=bpl)
+    
+    if any('_AGE_' in col for col in final_df.columns):
+        bai = [0, 40, 50, 60, 70, 80, 120]
+        bal = ['below 40s', 'in 40s', 'in 50s', 'in 60s', 'in 70s', 'above 80s']
+        for series_name, series in final_df.loc[:, final_df.columns.str.contains('_AGE_')].items():
+            final_df[series_name + '_cat'] = pd.cut(series, bins=bai, labels=bal)
     
     if 'APPT_TIME' in final_df.columns:
         final_df["APPT_TIME"] = final_df["APPT_TIME"].astype("string")
