@@ -74,7 +74,7 @@ def get_patient(clinic_num: str, callin_date: datetime | None = None) -> Patient
 
 
 @app.get("/api/cap3/patient-like-me/{clinic_num}")
-def find_similar_patient(clinic_num: str) -> PatientAnalysis:
+def find_similar_patient(clinic_num: str, num_neighbors: str = "5") -> PatientAnalysis:
     """Find similar patients, use MRN# 3-303-923 or 3-303-925 in dev (dash required).
 
     """
@@ -82,7 +82,8 @@ def find_similar_patient(clinic_num: str) -> PatientAnalysis:
     print(f"find_similar_patient ({clinic_num})")
 
     req = get_patient(clinic_num)
-    analysis_response = call_analysis_service ("POST", req, f"{ANALYSIS_URL}/cap3/patient-like-me", IAP_CLIENT_ID)
+
+    analysis_response = call_analysis_service ("POST", req, f"{ANALYSIS_URL}/cap3/patient-like-me?num_neighbors={num_neighbors}", IAP_CLIENT_ID)
     print("analysis_response")
     print(json.dumps(analysis_response))
     return analysis_response
