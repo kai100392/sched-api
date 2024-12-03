@@ -116,7 +116,7 @@ class RecommendationItem(BaseModel):
     name: str | None = None
     score: float | None = None
     median_days: float | None = None
-
+    index: list[int] = None
 
 class Recommendations(BaseModel):
     target_1: list[RecommendationItem] = None
