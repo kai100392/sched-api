@@ -79,7 +79,7 @@ def find_similar_patient(clinic_num: str, num_neighbors: str = "5") -> PatientAn
 
     """
 
-    print(f"find_similar_patient ({clinic_num})")
+    print(f"find_similar_patient ({clinic_num}, {num_neighbors})")
 
     req = get_patient(clinic_num)
 
