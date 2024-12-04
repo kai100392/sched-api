@@ -277,11 +277,11 @@ def update_df(df,call_in_date):
     if 'psa_recent_increase_percent_cat' in final_df.columns:
         final_df["psa_recent_increase_percent_cat"] = final_df["psa_recent_increase_percent_cat"].astype("string")   
     
-    for column in final_df.columns:
-        if final_df[column].dtype == 'string':
-            final_df[column].fillna('', inplace=True)
-        elif final_df[column].dtype in ['int64', 'float64']:
-            final_df[column].fillna(0, inplace=True)
+    # for column in final_df.columns:
+    #     if final_df[column].dtype == 'string':
+    #         final_df[column].fillna('', inplace=True)
+    #     elif final_df[column].dtype in ['int64', 'float64']:
+    #         final_df[column].fillna(0, inplace=True)
     
     return final_df
 
