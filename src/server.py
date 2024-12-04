@@ -74,8 +74,6 @@ def get_patient(clinic_num: str, callin_date: datetime | None = None) -> Patient
 
 
 @app.get("/api/cap3/patient-like-me/{clinic_num}")
-# def find_similar_patient(clinic_num: str, mock: str | None = None) -> PatientAnalysis:
-# def find_similar_patient(clinic_num: str, num_neighbors: str = Query("", description="Number of Similar Patients")) -> PatientAnalysis:
 def find_similar_patient(clinic_num: str, num_neighbors: str | None = "5") -> PatientAnalysis:
     """Find similar patients, use MRN# 3-303-923 or 3-303-925 in dev (dash required).
 
