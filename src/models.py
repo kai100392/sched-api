@@ -82,7 +82,7 @@ class SimilarPatient(PatientRequest):
     target_all_orders: str | None = None
     target_all_orders_after_appt_for30d: int | None = None
     target_appt_days_from_contact: int | None = None
-    distance = float | None = None
+    distance: float | None = None
 
 class PatientResponse(BaseModel):
     similar_patients: list[SimilarPatient] = []
