@@ -4,7 +4,7 @@ from pydantic import BaseModel
 
 class PatientRequest(BaseModel):
     APPT_TIME: str | None = None
-    CE_data: bool | None = False
+    CE_data: bool | None = None
     PROSTATE_CANCER_ENC_APPT_DEP_SPECIALTY_FIRST: str | None = None
     PROSTATE_CANCER_ENC_APPT_PRC_ID_FIRST: str | None = None
     PROSTATE_CANCER_ENC_VISIT_NAME_FIRST: str | None = None
@@ -78,7 +78,7 @@ class SimilarPatient(PatientRequest):
     target_2_days: int | None = None
     target_3: str | None = None
     target_3_days: int | None = None
-    target_CE_data: str | None = None
+    target_CE_data: bool | None = None
     target_all_orders: str | None = None
     target_all_orders_after_appt_for30d: int | None = None
     target_appt_days_from_contact: int | None = None
