@@ -2,7 +2,7 @@
 from pydantic import BaseModel
 
 
-class PatientRequest(BaseModel):
+class PatientRequest(BaseModel): 
     APPT_TIME: str | None = None
     CE_data: bool | None = None
     PROSTATE_CANCER_ENC_APPT_DEP_SPECIALTY_FIRST: str | None = None
@@ -13,39 +13,39 @@ class PatientRequest(BaseModel):
     PROSTATE_CANCER_VISIT_AGE_FIRST: float | None = None
     all_orders: str | None = None
     biopsy_1: str | None = None
-    biopsy_1_days: float | None = None
+    biopsy_1_days: int | None = None
     biopsy_1_abnormal: bool | None = None
     biopsy_2: str | None = None
-    biopsy_2_days: float| None = None
+    biopsy_2_days: int| None = None
     biopsy_2_abnormal: bool | None = None
     icd_10_1: str | None = None
     icd_10_2: str | None = None
     imaging_1: str | None = None
-    imaging_1_days: float | None = None
+    imaging_1_days: int | None = None
     imaging_1_abnormal: bool | None = None
     imaging_2: str | None = None
-    imaging_2_days: float | None = None
+    imaging_2_days: int | None = None
     imaging_2_abnormal: bool | None = None
     imaging_3: str | None = None
-    imaging_3_days: float | None = None
+    imaging_3_days: int | None = None
     imaging_3_abnormal: bool | None = None
     psa_1: str | None = None
-    psa_1_days: float | None = None
+    psa_1_days: int | None = None
     psa_1_value: float | None = None
     psa_1_unit: str | None = None
     psa_1_abnormal: bool | None = None
     psa_2: str | None = None
-    psa_2_days: float | None = None
+    psa_2_days: int | None = None
     psa_2_value: float | None = None
     psa_2_unit: str | None = None
     psa_2_abnormal: bool | None = None
     psa_3: str | None = None
-    psa_3_days: float | None = None
+    psa_3_days: int | None = None
     psa_3_value: float | None = None
     psa_3_unit: str | None = None
     psa_3_abnormal: bool | None = None
     psa_4: str | None = None
-    psa_4_days: float | None = None
+    psa_4_days: int | None = None
     psa_4_value: float | None = None
     psa_4_unit: str | None = None
     psa_4_abnormal: bool | None = None
