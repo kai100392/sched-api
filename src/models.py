@@ -80,7 +80,7 @@ class SimilarPatient(PatientRequest):
     target_3_days: int | None = None
     target_CE_data: bool | None = None
     target_all_orders: str | None = None
-    target_all_orders_after_appt_for30d: int | None = None
+    target_all_orders_after_appt_for30d: str | None = None
     target_appt_days_from_contact: int | None = None
     distance: float | None = None
 
